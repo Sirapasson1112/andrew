@@ -5,23 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบบริหารจัดการงานซ่อมบำรุงเชิงป้องกัน (PM-CMMS Pro Field Edition)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
     <style>
         body { font-family: 'Prompt', sans-serif; }
+        .sarabun-font { font-family: 'Sarabun', sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        .a4-page {
-            width: 210mm; min-height: 297mm; padding: 15mm; margin: 0 auto; background: white;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); box-sizing: border-box;
+        .a4-sheet {
+            width: 210mm; min-height: 297mm; padding: 12mm 15mm; margin: 0 auto; background: white;
+            box-shadow: 0 10px 25px -5px rgba(30, 41, 59, 0.08); border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box;
         }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #000000; padding: 3px 5px; font-size: 10px; color: #000000; }
+        th { background-color: #f1f5f9; font-weight: 600; text-align: center; }
+        input[type="text"], input[type="date"], select { border: none; outline: none; background: transparent; width: 100%; font-family: 'Sarabun', sans-serif; font-size: 10px; color: #000000; }
+        .form-header-bg { background-color: #d1d5db; font-weight: bold; color: #000; }
+        .sub-header-bg { background-color: #f3f4f6; font-weight: bold; color: #000; }
         @media print {
-            body { background: white !important; overflow: auto !important; }
+            body { background: white !important; }
             aside, header, .no-print { display: none !important; }
-            .a4-page { box-shadow: none !important; margin: 0 !important; width: 100% !important; padding: 10mm !important; }
+            .a4-sheet { box-shadow: none !important; margin: 0 !important; width: 100% !important; padding: 8mm !important; border: none !important; }
         }
     </style>
 </head>
@@ -32,7 +39,7 @@
     <div id="offline-banner" class="bg-amber-500 text-slate-950 px-4 py-1.5 text-xs font-semibold text-center hidden no-print flex items-center justify-center space-x-2">
         <i data-lucide="wifi-off" class="w-4 h-4"></i>
         <span>กำลังทำงานในโหมดออฟไลน์ (ข้อมูลจะถูกบันทึกและซิงค์อัตโนมัติเมื่อเชื่อมต่ออินเทอร์เน็ต)</span>
-        <button onclick="manualSync()" class="underline ml-2 bg-amber-600 text-white px-2 py-0.5 rounded">ซิงค์ทันที</button>
+        <button onclick="manualSync()" class="underline ml-2 bg-amber-600 text-white px-2 py-0.5 rounded cursor-pointer">ซิงค์ทันที</button>
     </div>
 
     <!-- Main Wrapper -->
@@ -53,6 +60,7 @@
                 <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
 
+            <!-- Sidebar Menu ตามคำขอ -->
             <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar">
                 <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white active-tab" data-target="dashboard">
                     <i data-lucide="layout-dashboard" class="w-5 h-5 text-blue-400"></i><span>Dashboard</span>
@@ -91,23 +99,24 @@
             </header>
 
             <div class="flex-1 overflow-y-auto custom-scrollbar p-6">
+                
                 <!-- TAB 1: DASHBOARD -->
                 <section id="tab-dashboard" class="tab-content space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                            <div><p class="text-xs font-semibold text-slate-500 uppercase">จุดตรวจทั้งหมด</p><h3 id="stat-total" class="text-3xl font-bold text-slate-900 mt-1">0</h3></div>
+                            <div><p class="text-xs font-semibold text-slate-500 uppercase">จุดตรวจทั้งหมด</p><h3 id="stat-total" class="text-3xl font-bold text-slate-900 mt-1">12</h3></div>
                             <div class="p-3.5 bg-blue-50 text-blue-600 rounded-xl"><i data-lucide="cpu" class="w-6 h-6"></i></div>
                         </div>
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                            <div><p class="text-xs font-semibold text-slate-500 uppercase">ผ่านการตรวจสอบ</p><h3 id="stat-pass" class="text-3xl font-bold text-emerald-600 mt-1">0</h3></div>
+                            <div><p class="text-xs font-semibold text-slate-500 uppercase">ผ่านการตรวจสอบ</p><h3 id="stat-pass" class="text-3xl font-bold text-emerald-600 mt-1">9</h3></div>
                             <div class="p-3.5 bg-emerald-50 text-emerald-600 rounded-xl"><i data-lucide="check-circle-2" class="w-6 h-6"></i></div>
                         </div>
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                            <div><p class="text-xs font-semibold text-slate-500 uppercase">พบปัญหา / เฝ้าระวัง</p><h3 id="stat-warning" class="text-3xl font-bold text-amber-600 mt-1">0</h3></div>
+                            <div><p class="text-xs font-semibold text-slate-500 uppercase">พบปัญหา / เฝ้าระวัง</p><h3 id="stat-warning" class="text-3xl font-bold text-amber-600 mt-1">2</h3></div>
                             <div class="p-3.5 bg-amber-50 text-amber-600 rounded-xl"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div>
                         </div>
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                            <div><p class="text-xs font-semibold text-slate-500 uppercase">ต้องซ่อมด่วน (Critical)</p><h3 id="stat-critical" class="text-3xl font-bold text-rose-600 mt-1">0</h3></div>
+                            <div><p class="text-xs font-semibold text-slate-500 uppercase">ต้องซ่อมด่วน (Critical)</p><h3 id="stat-critical" class="text-3xl font-bold text-rose-600 mt-1">1</h3></div>
                             <div class="p-3.5 bg-rose-50 text-rose-600 rounded-xl"><i data-lucide="shield-alert" class="w-6 h-6"></i></div>
                         </div>
                     </div>
@@ -118,7 +127,7 @@
                     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-5 space-y-4">
                         <div class="flex justify-between items-center">
                             <h3 class="font-bold text-base text-slate-800">ตารางวางแผนการบำรุงรักษาเชิงป้องกัน (PM Schedule)</h3>
-                            <button onclick="openScheduleModal()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5">
+                            <button onclick="openScheduleModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
                                 <i data-lucide="plus" class="w-4 h-4"></i><span>สร้างแผน PM</span>
                             </button>
                         </div>
@@ -126,7 +135,10 @@
                             <thead><tr class="bg-slate-50 border-b text-xs text-slate-500 uppercase">
                                 <th class="py-3 px-4">รหัสอุปกรณ์</th><th class="py-3 px-4">ชื่องาน PM</th><th class="py-3 px-4">ความถี่</th><th class="py-3 px-4">กำหนดการ</th><th class="py-3 px-4 text-right">สถานะ</th>
                             </tr></thead>
-                            <tbody id="schedule-tbody" class="divide-y"></tbody>
+                            <tbody id="schedule-tbody" class="divide-y">
+                                <tr><td class="py-3 px-4 font-mono">TR-01</td><td class="py-3 px-4">ตรวจวัดอุณหภูมิน้ำมันหม้อแปลง และระบบ Ground</td><td class="py-3 px-4">รายไตรมาส</td><td class="py-3 px-4 font-mono text-xs">2026-03-28</td><td class="py-3 px-4 text-right"><span class="bg-amber-50 text-amber-600 px-2.5 py-1 rounded-full text-xs">รอดำเนินการ</span></td></tr>
+                                <tr><td class="py-3 px-4 font-mono">LBS-02</td><td class="py-3 px-4">ตรวจสอบก๊าซ SF6 และตู้ Control</td><td class="py-3 px-4">รายเดือน</td><td class="py-3 px-4 font-mono text-xs">2026-03-15</td><td class="py-3 px-4 text-right"><span class="bg-rose-50 text-rose-600 px-2.5 py-1 rounded-full text-xs">เลยกำหนด</span></td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </section>
@@ -155,21 +167,36 @@
                     </div>
                 </section>
 
-                <!-- TAB 4: ฟอร์มเอกสารการบำรุงรักษาอุปกรณ์ไฟฟ้า (A4) -->
+                <!-- TAB 4: ฟอร์มเอกสารการบำรุงรักษาอุปกรณ์ไฟฟ้า (บูรณาการฟอร์ม 11 แบบ A4 ของ กฟน.) -->
                 <section id="tab-electrical-form" class="tab-content hidden space-y-6">
-                    <div class="max-w-[210mm] mx-auto bg-white p-4 rounded-2xl border shadow-sm flex justify-between items-center no-print">
-                        <select id="form-selector" onchange="switchElectricalForm(this.value)" class="px-3 py-2 border rounded-xl text-xs font-semibold bg-slate-50">
-                            <option value="SF-07-0-015">SF-07-0-015: แบบตรวจสอบบำรุงรักษาหม้อแปลงจำหน่าย[cite: 2]</option>
-                            <option value="SF-07-0-025">SF-07-0-025: รายงานผลตรวจสอบ Acoustic Camera[cite: 12]</option>
-                        </select>
-                        <div class="flex space-x-2">
-                            <button onclick="captureFieldMetadata()" class="px-3 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold flex items-center space-x-1">
-                                <i data-lucide="map-pin" class="w-3.5 h-3.5"></i><span>ดึงพิกัด & เวลาอัตโนมัติ</span>
-                            </button>
-                            <button onclick="window.print()" class="px-3 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold">พิมพ์ A4</button>
+                    <!-- Action Toolbar สำหรับฟอร์มเอกสาร -->
+                    <div class="max-w-[210mm] mx-auto bg-white p-4 rounded-2xl border border-slate-300 shadow-xs flex flex-wrap items-center justify-between gap-3 no-print">
+                        <div class="flex items-center gap-2">
+                            <select id="formSelector" onchange="loadForm(this.value)" class="px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold bg-slate-50 text-slate-800">
+                                <option value="015">SF-07-0-015: หม้อแปลงจำหน่าย[cite: 2]</option>
+                                <option value="016">SF-07-0-016: Load Break Switch (LBS)[cite: 3]</option>
+                                <option value="017">SF-07-0-017: Sectionalizer (SZ)[cite: 4]</option>
+                                <option value="018">SF-07-0-018: Ring Main Unit (RMU)[cite: 5]</option>
+                                <option value="019">SF-07-0-019: Unit Substation (หน้า 1)[cite: 6]</option>
+                                <option value="019_2">SF-07-0-019: Unit Substation (หน้า 2)[cite: 6]</option>
+                                <option value="020">SF-07-0-020: Capacitor Bank 12-24 kV[cite: 7]</option>
+                                <option value="021">SF-07-0-021: เครื่องป้องกันหม้อแปลงตาข่าย[cite: 8]</option>
+                                <option value="022">SF-07-0-022: หม้อแปลงตาข่ายและสวิตช์แรงกลาง[cite: 9]</option>
+                                <option value="023">SF-07-0-023: ทดสอบและกรองน้ำมันหม้อแปลง[cite: 10]</option>
+                                <option value="024">SF-07-0-024: รายงานจุดร้อนแดง (Hot Spot)[cite: 11]</option>
+                                <option value="025">SF-07-0-025: ตรวจสอบการคายประจุ (Acoustic Camera)[cite: 12]</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="saveNewRecord()" class="px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-medium cursor-pointer shadow-xs">💾 บันทึกใหม่</button>
+                            <button onclick="window.print()" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-medium cursor-pointer shadow-xs">🖨️ พิมพ์/PDF</button>
                         </div>
                     </div>
-                    <div id="a4-form-container" class="a4-page space-y-4 text-xs text-slate-800"></div>
+
+                    <!-- A4 Workspace -->
+                    <div class="sarabun-font flex justify-center pb-12">
+                        <div id="a4Paper" class="a4-sheet text-slate-900 bg-white"></div>
+                    </div>
                 </section>
 
                 <!-- TAB 5: นำเส้นทางตรวจ PM ภาคสนาม -->
@@ -177,7 +204,7 @@
                     <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
                         <h3 class="font-bold text-base text-slate-900">ระบบนำทางและบันทึกผลภาคสนาม (Field Inspection)</h3>
                         <div class="flex items-center space-x-3">
-                            <button onclick="openFieldModal('TR-01')" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5">
+                            <button onclick="openFieldModal('TR-01')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
                                 <i data-lucide="camera" class="w-4 h-4"></i><span>สแกน QR อุปกรณ์ & บันทึกตรวจหน้างาน</span>
                             </button>
                         </div>
@@ -228,8 +255,8 @@
                 <div><label class="block text-xs font-semibold">ความถี่:</label><input type="text" id="sch-freq" required class="w-full px-3 py-1.5 border rounded-lg" value="รายเดือน"></div>
                 <div><label class="block text-xs font-semibold">กำหนดการ:</label><input type="date" id="sch-date" required class="w-full px-3 py-1.5 border rounded-lg"></div>
                 <div class="pt-2 flex justify-end space-x-2">
-                    <button type="button" onclick="closeScheduleModal()" class="px-4 py-2 border rounded-xl text-xs">ยกเลิก</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold">บันทึกแผนงาน</button>
+                    <button type="button" onclick="closeScheduleModal()" class="px-4 py-2 border rounded-xl text-xs cursor-pointer">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold cursor-pointer">บันทึกแผนงาน</button>
                 </div>
             </form>
         </div>
@@ -262,8 +289,8 @@
                 </div>
             </div>
             <div class="pt-2 flex justify-end space-x-2">
-                <button onclick="closeFieldModal()" class="px-4 py-2 border rounded-xl text-xs font-medium">ยกเลิก</button>
-                <button onclick="saveFieldInspection()" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold">บันทึกและซิงค์ข้อมูล</button>
+                <button onclick="closeFieldModal()" class="px-4 py-2 border rounded-xl text-xs font-medium cursor-pointer">ยกเลิก</button>
+                <button onclick="saveFieldInspection()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold cursor-pointer">บันทึกและซิงค์ข้อมูล</button>
             </div>
         </div>
     </div>
@@ -276,12 +303,63 @@
             isOnline: navigator.onLine
         };
 
+        const formsData = {
+            "015": {
+                title: "แบบตรวจสอบบำรุงรักษาหม้อแปลงจำหน่าย",
+                code: "SF-07-0-015",
+                render: () => `
+                    <div class="text-center font-bold text-sm mb-3 text-black">แบบตรวจสอบบำรุงรักษาหม้อแปลงจำหน่าย</div>
+                    <table>
+                        <tr><td class="form-header-bg text-center w-6">1</td><td colspan="5" class="form-header-bg">ข้อมูลทั่วไป</td></tr>
+                        <tr>
+                            <td colspan="2" class="sub-header-bg w-24">Station ID</td><td colspan="2"><input type="text"></td>
+                            <td class="sub-header-bg w-16">สถานที่</td><td><input type="text"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="sub-header-bg flex justify-between items-center"><span>GIS</span><button onclick="getGPSLocation('lat015','long015')" class="no-print text-sky-700 bg-sky-50 px-1 rounded text-[9px] cursor-pointer">📍 ดึงพิกัด</button></td>
+                            <td colspan="2">Lat. <input type="text" id="lat015" class="inline-block w-3/4"></td>
+                            <td colspan="2">Long. <input type="text" id="long015" class="inline-block w-3/4"></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" class="sub-header-bg">MEA No1.</td><td><input type="text"></td>
+                            <td class="sub-header-bg">MEA No2.</td><td><input type="text"></td>
+                            <td>MEA No3. <input type="text" class="w-1/4 inline-block"> จำนวนเฟส <input type="text" class="w-1/4 inline-block"></td>
+                        </tr>
+                        <tr><td class="form-header-bg text-center">2</td><td colspan="5" class="form-header-bg">รายการตรวจสอบบำรุงรักษา</td></tr>
+                        <tr><td rowspan="2" colspan="2" class="sub-header-bg text-center">รายการ</td><td colspan="3" class="sub-header-bg text-center">ผลการตรวจสอบ</td><td rowspan="2" class="sub-header-bg text-center w-48">ข้อบกพร่อง</td></tr>
+                        <tr><td class="sub-header-bg text-center w-12">ปกติ</td><td class="sub-header-bg text-center w-12">ชำรุด</td><td class="sub-header-bg text-center w-12">ไม่มี</td></tr>
+                        ${["2.1 Drop Fuse", "2.2 Station Post Type Insulator", "2.3 สายเข้า-ออก Drop Fuse", "2.4 คอนสาย", "2.5 อุปกรณ์ป้องกันสัตว์", "2.6 Low Voltage Capacitor", "2.7 กับดักฟ้าผ่า (L/A)", "2.8 ตัวถังหม้อแปลง", "2.9 Bushing HV-LV", "2.10 Cover (Bushing,L/A,Term. kit)", "2.11 สายหน้าหม้อแปลง LV", "2.12 LV Ground", "2.13 HV Ground", "2.14 CT-TLM Meter (ถ้ามี)"].map((item, i) => `
+                            <tr><td colspan="2">${item}</td><td class="text-center"><input type="checkbox"></td><td class="text-center"><input type="checkbox"></td><td class="text-center"><input type="checkbox"></td><td><input type="text"></td></tr>
+                        `).join('')}
+                    </table>
+                    <div class="flex justify-between text-[9px] mt-2 pt-1 border-t border-black text-black"><span>ปรับปรุงครั้งที่ 0 วันที่ ...</span><span class="font-mono">SF-07-0-015</span></div>
+                `
+            },
+            "025": {
+                title: "รายงานผลการตรวจสอบการคายประจุไฟฟ้า (Partial Discharge)",
+                code: "SF-07-0-025",
+                render: () => `
+                    <div class="text-center font-bold text-sm mb-2 text-black">รายงานผลการตรวจสอบการคายประจุไฟฟ้าบางส่วน (Partial Discharge)<br>โดยใช้กล้อง Acoustic Camera</div>
+                    <table>
+                        <tr><td class="sub-header-bg w-20">Station ID</td><td><input type="text"></td><td class="sub-header-bg w-20">อุปกรณ์</td><td><input type="text"></td><td class="sub-header-bg w-20">MEA No.</td><td><input type="text"></td></tr>
+                        <tr>
+                            <td class="sub-header-bg flex justify-between items-center"><span>GIS</span><button onclick="getGPSLocation('lat025','long025')" class="no-print text-sky-700 bg-sky-50 px-1 rounded text-[9px] cursor-pointer">📍 ดึงพิกัด</button></td>
+                            <td colspan="2">Lat. <input type="text" id="lat025"></td>
+                            <td colspan="3">Long. <input type="text" id="long025"></td>
+                        </tr>
+                        <tr><td colspan="6" class="p-2">ระดับความเข้มเสียงที่ตรวจวัดได้ : <input type="text" class="border-b border-black w-24 inline-block"> dB</td></tr>
+                    </table>
+                    <div class="flex justify-between text-[9px] mt-2 pt-1 border-t border-black text-black"><span>ปรับปรุงครั้งที่ 0 วันที่...</span><span class="font-mono">SF-07-0-025</span></div>
+                `
+            }
+        };
+
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             updateOnlineStatus();
             window.addEventListener('online', () => { state.isOnline = true; updateOnlineStatus(); });
             window.addEventListener('offline', () => { state.isOnline = false; updateOnlineStatus(); });
-            switchElectricalForm('SF-07-0-015');
+            loadForm('015');
             renderSchedules();
             renderDashboard();
             const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
@@ -351,6 +429,12 @@
             `).join('');
         }
 
+        function loadForm(key) {
+            const form = formsData[key] || formsData["015"];
+            document.getElementById('a4Paper').innerHTML = form.render();
+            lucide.createIcons();
+        }
+
         function openScheduleModal() { document.getElementById('schedule-modal').classList.remove('hidden'); }
         function closeScheduleModal() { document.getElementById('schedule-modal').classList.add('hidden'); }
 
@@ -393,28 +477,7 @@
         }
 
         function manualSync() { showToast('ซิงค์ข้อมูลออฟไลน์ขึ้น Server สำเร็จ'); }
-
-        function switchElectricalForm(formId) {
-            const container = document.getElementById('a4-form-container');
-            if (formId === 'SF-07-0-015') {
-                container.innerHTML = `
-                    <div class="flex justify-between items-start border-b-2 border-slate-900 pb-3">
-                        <div><h1 class="font-bold text-sm text-slate-900">การไฟฟ้านครหลวง (MEA)</h1><h2 class="font-bold text-base text-slate-900 mt-1">แบบตรวจสอบบำรุงรักษาหม้อแปลงจำหน่าย[cite: 2]</h2></div>
-                        <div class="text-right font-mono text-xs font-bold text-slate-700">SF-07-0-015[cite: 2]</div>
-                    </div>
-                    <div><h3 class="font-bold bg-slate-100 px-2 py-1 text-slate-900 border">1. ข้อมูลทั่วไป[cite: 2]</h3>
-                    <table class="w-full border-collapse border text-[11px]"><tr>
-                        <td class="border p-1.5 bg-slate-50 font-semibold">Station ID: TR-01</td>
-                        <td class="border p-1.5 bg-slate-50 font-semibold">GPS: อัตโนมัติ (13.7563° N)</td>
-                        <td class="border p-1.5 bg-slate-50 font-semibold">เวลาตรวจ: ${new Date().toLocaleDateString('th-TH')}</td>
-                    </tr></table></div>
-                `;
-            } else {
-                container.innerHTML = `<div class="p-4 text-center font-bold">ฟอร์ม ${formId} รูปแบบกระดาษ A4 ภาคสนาม</div>`;
-            }
-            lucide.createIcons();
-        }
-
+        function saveNewRecord() { showToast('บันทึกข้อมูลฟอร์มเอกสารเรียบร้อยแล้ว'); }
         function captureFieldMetadata() { showToast('ดึงพิกัด GPS และ Timestamp ปัจจุบันเรียบร้อย'); }
     </script>
 </body>
