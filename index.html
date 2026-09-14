@@ -3,10 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบบริหารจัดการงานซ่อมบำรุงเชิงป้องกัน (PM-CMMS Pro Complete Edition)</title>
+    <title>ระบบบริหารจัดการงานซ่อมบำรุงเชิงป้องกัน (PM-CMMS Pro Field Edition)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Leaflet CSS & JS สำหรับแผนที่จริง -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         body { font-family: 'Prompt', sans-serif; }
@@ -18,6 +21,7 @@
             width: 210mm; min-height: 297mm; padding: 12mm 15mm; margin: 0 auto; background: white;
             box-shadow: 0 10px 25px -5px rgba(30, 41, 59, 0.08); border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box;
         }
+        #realMap { width: 100%; height: 450px; border-radius: 1rem; z-index: 10; }
         table { border-collapse: collapse; width: 100%; }
         th, td { border: 1px solid #000000; padding: 3px 5px; font-size: 10px; color: #000000; }
         th { background-color: #f1f5f9; font-weight: 600; text-align: center; }
@@ -68,7 +72,7 @@
                     <i data-lucide="map" class="w-5 h-5 text-indigo-400"></i><span>วางแผนเส้นทางตรวจอุปกรณ์</span>
                 </button>
                 <button onclick="switchTab('electrical-form')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="electrical-form">
-                    <i data-lucide="file-text" class="w-5 h-5 text-cyan-400"></i><span>ฟอร์มเอกสาร (11 แบบ กฟน.)</span>
+                    <i data-lucide="file-text" class="w-5 h-5 text-cyan-400"></i><span>ฟอร์มเอกสารการบำรุงรักษาอุปกรณ์ไฟฟ้า</span>
                 </button>
                 <button onclick="switchTab('field-route')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="field-route">
                     <i data-lucide="navigation" class="w-5 h-5 text-emerald-400"></i><span>นำเส้นทางตรวจ & บันทึกภาคสนาม</span>
@@ -125,7 +129,6 @@
                             <div class="p-3.5 bg-rose-50 text-rose-600 rounded-xl"><i data-lucide="shield-alert" class="w-6 h-6"></i></div>
                         </div>
                     </div>
-                    <!-- Predictive Maintenance Trend Chart Simulation -->
                     <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
                         <div class="flex justify-between items-center">
                             <h3 class="font-bold text-base text-slate-900">กราฟวิเคราะห์แนวโน้มอุณหภูมิและความผิดปกติย้อนหลัง (Predictive Maintenance Trend)</h3>
@@ -158,18 +161,17 @@
                     </div>
                 </section>
 
-                <!-- TAB 3: วางแผนเส้นทางตรวจอุปกรณ์ (Real-time Map UX) -->
+                <!-- TAB 3: วางแผนเส้นทางตรวจอุปกรณ์ (Real Leaflet Map) -->
                 <section id="tab-route-plan" class="tab-content hidden space-y-6">
                     <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-                        <h3 class="font-bold text-base text-slate-900">แผนที่เส้นทางตรวจอุปกรณ์ Real-time (Field Navigation)</h3>
-                        <p class="text-xs text-slate-500">แสดงพิกัดจุดตรวจในพื้นที่โรงงานพร้อมสถานะแต่ละจุด</p>
-                        <div class="w-full h-72 bg-slate-200 rounded-xl relative flex items-center justify-center overflow-hidden border">
-                            <div class="absolute inset-0 bg-slate-800 opacity-10"></div>
-                            <div class="text-center z-10 space-y-2">
-                                <i data-lucide="map-pin" class="w-10 h-10 text-rose-600 mx-auto animate-bounce"></i>
-                                <p class="text-xs font-semibold text-slate-700 bg-white px-3 py-1 rounded-full shadow">กำลังนำทางไปยังจุดตรวจ: TR-01 (สถานีไฟฟ้าแรงสูง 1)</p>
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <h3 class="font-bold text-base text-slate-900">แผนที่เส้นทางตรวจสอบอุปกรณ์ไฟฟ้าภาคสนาม (Real Map)</h3>
+                                <p class="text-xs text-slate-500">คลิกที่หมุดหม้อแปลงเพื่อดูรายละเอียดจุดตรวจและเริ่มนำทาง</p>
                             </div>
+                            <button onclick="initRealMap()" class="px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-semibold cursor-pointer">🔄 รีเฟรชแผนที่</button>
                         </div>
+                        <div id="realMap"></div>
                     </div>
                 </section>
 
@@ -254,7 +256,7 @@
                 <div><label class="block text-xs font-semibold">รหัสอุปกรณ์:</label><input type="text" id="sch-code" required class="w-full px-3.5 py-2 border rounded-xl" placeholder="เช่น TR-01"></div>
                 <div><label class="block text-xs font-semibold">ชื่องาน PM:</label><input type="text" id="sch-title" required class="w-full px-3.5 py-2 border rounded-xl" placeholder="ชื่องาน"></div>
                 <div><label class="block text-xs font-semibold">ความถี่:</label><input type="text" id="sch-freq" required class="w-full px-3.5 py-2 border rounded-xl" value="รายเดือน"></div>
-                <div><label class="block text-xs font-semibold">กำหนดการ:</label><input type="date" id="sch-date" required class="w-full px-3 py-1.5 border rounded-xl"></div>
+                <div><label class="block text-xs font-semibold">กำหนดการ:</label><input type="date" id="sch-date" required class="w-full px-3.5 py-1.5 border rounded-xl"></div>
                 <div class="pt-2 flex justify-end space-x-2">
                     <button type="button" onclick="closeScheduleModal()" class="px-4 py-2 border rounded-xl text-xs cursor-pointer">ยกเลิก</button>
                     <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold cursor-pointer">บันทึกแผนงาน</button>
@@ -314,6 +316,8 @@
             currentUser: 'Field Tech'
         };
 
+        let leafletMap = null;
+
         const formsData = {
             "015": {
                 title: "แบบตรวจสอบบำรุงรักษาหม้อแปลงจำหน่าย",
@@ -344,20 +348,22 @@
         // Fallback for 016-025 forms
         ['016','017','018','019','019_2','020','021','022','023','024','025'].forEach(k => {
             if(!formsData[k]) {
+                let codeRef = `SF-07-0-${k}`;
+                let citationRef = k === '016' ? '[cite: 3]' : k === '017' ? '[cite: 4]' : k === '018' ? '[cite: 5]' : k === '019' || k === '019_2' ? '[cite: 6]' : k === '020' ? '[cite: 7]' : k === '021' ? '[cite: 8]' : k === '022' ? '[cite: 9]' : k === '023' ? '[cite: 10]' : k === '024' ? '[cite: 11]' : '[cite: 12]';
                 formsData[k] = {
-                    title: `ฟอร์มมาตรฐาน กฟน. SF-07-0-${k}`,
-                    code: `SF-07-0-${k}`,
+                    title: `ฟอร์มมาตรฐาน กฟน. ${codeRef}`,
+                    code: codeRef,
                     render: () => `
-                        <div class="text-center font-bold text-sm mb-3 text-black">แบบฟอร์มตรวจสอบมาตรฐาน กฟน. (รหัส: SF-07-0-${k})</div>
+                        <div class="text-center font-bold text-sm mb-3 text-black">แบบฟอร์มตรวจสอบมาตรฐาน กฟน. (รหัส: ${codeRef}) ${citationRef}</div>
                         <table>
-                            <tr><td class="form-header-bg text-center">1</td><td colspan="5" class="form-header-bg">ข้อมูลทั่วไปและรายการตรวจสอบภาคสนาม</td></tr>
+                            <tr><td class="form-header-bg text-center">1</td><td colspan="5" class="form-header-bg">ข้อมูลทั่วไปและรายการตรวจสอบภาคสนาม ${citationRef}</td></tr>
                             <tr><td colspan="2" class="sub-header-bg">สถานี / Station ID</td><td colspan="4"><input type="text" placeholder="ระบุชื่อสถานี"></td></tr>
                             <tr><td colspan="2" class="sub-header-bg">พิกัด GPS</td><td colspan="4"><input type="text" id="latlong_${k}" placeholder="ดึงพิกัดอัตโนมัติ"> <button onclick="getGPSLocation('latlong_${k}','')" class="no-print text-sky-700 bg-sky-50 px-1 rounded text-[9px] cursor-pointer">📍 ดึงพิกัด</button></td></tr>
-                            <tr><td rowspan="5" class="sub-header-bg text-center">Checklist มาตรฐาน</td><td colspan="5"><input type="checkbox"> ผ่านการตรวจสอบสภาพภายนอกและจุดต่อทางไฟฟ้า</td></tr>
-                            <tr><td colspan="5"><input type="checkbox"> ผ่านการวัดค่าแรงดันและกระแสไฟฟ้าโหลด</td></tr>
-                            <tr><td colspan="5"><input type="checkbox"> ผ่านการทดสอบระบบควบคุมและป้องกัน</td></tr>
+                            <tr><td rowspan="3" class="sub-header-bg text-center">Checklist มาตรฐาน</td><td colspan="5"><input type="checkbox"> ผ่านการตรวจสอบสภาพภายนอกและจุดต่อทางไฟฟ้า ${citationRef}</td></tr>
+                            <tr><td colspan="5"><input type="checkbox"> ผ่านการวัดค่าแรงดันและกระแสไฟฟ้าโหลด ${citationRef}</td></tr>
+                            <tr><td colspan="5"><input type="checkbox"> ผ่านการทดสอบระบบควบคุมและป้องกัน ${citationRef}</td></tr>
                         </table>
-                        <div class="flex justify-between text-[9px] mt-4 pt-1 border-t border-black text-black"><span>มาตรฐาน กฟน. ภาคสนาม</span><span class="font-mono">SF-07-0-${k}</span></div>
+                        <div class="flex justify-between text-[9px] mt-4 pt-1 border-t border-black text-black"><span>มาตรฐาน กฟน. ภาคสนาม</span><span class="font-mono">${codeRef} ${citationRef}</span></div>
                     `
                 };
             }
@@ -408,6 +414,38 @@
                 'admin-settings': 'จัดการสิทธิ์ & Audit Log'
             };
             document.getElementById('page-title').innerText = titles[tabId] || 'PM-CMMS Pro';
+
+            // ถ้ากดแท็บวางแผนเส้นทาง ให้โหลดแผนที่จริง Leaflet
+            if(tabId === 'route-plan') {
+                setTimeout(initRealMap, 200);
+            }
+        }
+
+        function initRealMap() {
+            const mapContainer = document.getElementById('realMap');
+            if (!mapContainer) return;
+            if (leafletMap) {
+                leafletMap.remove();
+            }
+            // สร้างแผนที่จริง พิกัดกรุงเทพฯ (หรือเปลี่ยนเป็นพิกัดโรงงานจริง)
+            leafletMap = L.map('realMap').setView([13.7563, 100.5018], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(leafletMap);
+
+            // ปักหมุดอุปกรณ์ตรวจ (ตัวอย่างจุดตรวจไฟฟ้า)
+            const sites = [
+                { code: 'TR-01', name: 'Main Transformer 1000kVA', lat: 13.7573, lon: 100.5028, status: 'ปกติ' },
+                { code: 'LBS-02', name: 'Load Break Switch อาคาร A', lat: 13.7540, lon: 100.5005, status: 'ต้องซ่อมด่วน' },
+                { code: 'RMU-01', name: 'Ring Main Unit โซนผลิต', lat: 13.7580, lon: 100.4990, status: 'เฝ้าระวัง' }
+            ];
+
+            sites.forEach(s => {
+                let colorMarker = s.status === 'ปกติ' ? '🟢' : s.status === 'ต้องซ่อมด่วน' ? '🔴' : '🟡';
+                L.marker([s.lat, s.lon]).addTo(leafletMap)
+                  .bindPopup(`<b>${s.code}: ${s.name}</b><br>สถานะ: ${s.status}<br><button onclick="openFieldModal('${s.code}')" class="mt-1 px-2 py-1 bg-blue-600 text-white rounded text-[10px]">ตรวจสอบจุดนี้</button>`);
+            });
         }
 
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
@@ -519,7 +557,6 @@
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
                     document.getElementById('image-preview-container').classList.remove('hidden');
                     
-                    // Enable simple drawing for annotation
                     let isDrawing = false;
                     canvas.onmousedown = (ev) => { isDrawing = true; ctx.beginPath(); ctx.moveTo(ev.offsetX, ev.offsetY); };
                     canvas.onmousemove = (ev) => { if(!isDrawing) return; ctx.lineTo(ev.offsetX, ev.offsetY); ctx.strokeStyle = 'red'; ctx.lineWidth = 2; ctx.stroke(); };
@@ -586,11 +623,6 @@
         }
 
         function saveNewRecord() { showToast('บันทึกข้อมูลฟอร์มเอกสารเรียบร้อยแล้ว'); }
-        function loadForm(key) {
-            const form = formsData[key] || formsData["015"];
-            document.getElementById('a4Paper').innerHTML = form.render();
-            lucide.createIcons();
-        }
     </script>
 </body>
 </html>
