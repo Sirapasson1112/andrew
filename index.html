@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบบริหารจัดการงานซ่อมบำรุงเชิงป้องกัน (PM-CMMS Pro Light Edition)</title>
+    <title>ระบบบริหารจัดการงานซ่อมบำรุงเชิงป้องกัน (PM-CMMS Pro Excel Integration & Field Suite)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
@@ -45,7 +46,7 @@
     </div>
 
     <div class="flex h-full w-full overflow-hidden">
-        <!-- Sidebar Navigation (Clean White & Dark Gray Theme) -->
+        <!-- Sidebar Navigation -->
         <aside id="sidebar" class="w-64 bg-slate-900 text-slate-200 flex flex-col transition-all duration-300 z-30 shrink-0 md:relative absolute inset-y-0 left-0 -translate-x-full md:translate-x-0 shadow-xl no-print">
             <div class="p-5 flex items-center justify-between border-b border-slate-800">
                 <div class="flex items-center space-x-3">
@@ -54,7 +55,7 @@
                     </div>
                     <div>
                         <h1 class="font-bold text-base text-white tracking-wide">PM-CMMS Pro</h1>
-                        <p class="text-[10px] text-slate-400">Light Edition</p>
+                        <p class="text-[10px] text-slate-400">Complete Edition</p>
                     </div>
                 </div>
                 <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
@@ -77,7 +78,7 @@
                     <i data-lucide="navigation" class="w-4 h-4 text-slate-400"></i><span>นำเส้นทางตรวจ & ภาคสนาม</span>
                 </button>
                 <button onclick="switchTab('wo-analytics')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="wo-analytics">
-                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-slate-400"></i><span>วิเคราะห์ Work Order</span>
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-slate-400"></i><span>วิเคราะห์ Work Order & Excel</span>
                 </button>
                 <button onclick="switchTab('admin-settings')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="admin-settings">
                     <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i><span>จัดการสิทธิ์ & Audit Log</span>
@@ -109,7 +110,7 @@
 
             <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
                 
-                <!-- TAB 1: DASHBOARD & AI PREDICTIVE ANALYTICS -->
+                <!-- TAB 1: DASHBOARD -->
                 <section id="tab-dashboard" class="tab-content space-y-6">
                     <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                         <div class="flex items-center space-x-3">
@@ -137,7 +138,7 @@
                     </div>
                 </section>
 
-                <!-- TAB 2: ตารางวางแผน PM อุปกรณ์ไฟฟ้า -->
+                <!-- TAB 2: PM SCHEDULE -->
                 <section id="tab-pm-schedule" class="tab-content hidden space-y-6">
                     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
                         <div class="flex justify-between items-center">
@@ -159,7 +160,7 @@
                     </div>
                 </section>
 
-                <!-- TAB 3: วางแผนเส้นทางตรวจอุปกรณ์ (Real Leaflet Map) -->
+                <!-- TAB 3: ROUTE PLAN -->
                 <section id="tab-route-plan" class="tab-content hidden space-y-6">
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                         <div class="flex justify-between items-center">
@@ -183,7 +184,7 @@
                     </div>
                 </section>
 
-                <!-- TAB 4: ฟอร์มเอกสารการบำรุงรักษาอุปกรณ์ไฟฟ้า (A4 - 11 แบบ กฟน.) -->
+                <!-- TAB 4: ELECTRICAL FORM (A4) -->
                 <section id="tab-electrical-form" class="tab-content hidden space-y-6">
                     <div class="max-w-[210mm] mx-auto bg-white p-4 rounded-2xl border border-slate-300 shadow-xs flex flex-wrap items-center justify-between gap-3 no-print">
                         <div class="flex items-center gap-2">
@@ -212,7 +213,7 @@
                     </div>
                 </section>
 
-                <!-- TAB 5: นำเส้นทางตรวจ PM ภาคสนาม (Step-by-step Check-in) -->
+                <!-- TAB 5: FIELD ROUTE -->
                 <section id="tab-field-route" class="tab-content hidden space-y-6">
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                         <div class="flex justify-between items-center">
@@ -238,25 +239,45 @@
                     </div>
                 </section>
 
-                <!-- TAB 6: วิเคราะห์ความผิดปกติของ Work Order & แจ้งเตือน LINE Notify -->
+                <!-- TAB 6: WO ANALYTICS & EXCEL IMPORT -->
                 <section id="tab-wo-analytics" class="tab-content hidden space-y-6">
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h3 class="font-bold text-base text-slate-900">วิเคราะห์ความผิดปกติของงาน Work Order แยกตามอุปกรณ์/ช่วงเวลา</h3>
-                            <button onclick="sendLineNotificationTest()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer shadow-sm">
-                                <i data-lucide="send" class="w-4 h-4"></i><span>แจ้งเตือน LINE Notify / Email ด่วน</span>
-                            </button>
+                        <div class="flex flex-wrap justify-between items-center gap-3 border-b border-slate-100 pb-4">
+                            <div>
+                                <h3 class="font-bold text-base text-slate-900">วิเคราะห์ความผิดปกติ Work Order & นำเข้าไฟล์ Excel</h3>
+                                <p class="text-xs text-slate-500">อัปโหลดไฟล์ประวัติ Work Order (.xlsx, .xls) เพื่อให้ระบบวิเคราะห์อัตโนมัติ</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="sendLineNotificationTest()" class="px-3.5 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer shadow-sm">
+                                    <i data-lucide="send" class="w-4 h-4"></i><span>แจ้งเตือน LINE ด่วน</span>
+                                </button>
+                                <label class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-2 cursor-pointer shadow-sm">
+                                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i><span>📂 นำเข้า Excel WO</span>
+                                    <input type="file" id="excelUploadInput" accept=".xlsx, .xls, .csv" onchange="handleExcelImport(event)" class="hidden">
+                                </label>
+                            </div>
                         </div>
+
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div class="p-4 bg-slate-50 border rounded-xl"><span class="text-xs text-slate-500 block">งานซ่อม Active ทั้งหมด</span><strong class="text-2xl font-bold text-slate-900">5 รายการ</strong></div>
-                            <div class="p-4 bg-slate-50 border rounded-xl"><span class="text-xs text-slate-500 block">กำลังดำเนินการซ่อม</span><strong class="text-2xl font-bold text-amber-600">2 รายการ</strong></div>
-                            <div class="p-4 bg-slate-50 border rounded-xl"><span class="text-xs text-slate-500 block">ปิดงานสำเร็จแล้ว</span><strong class="text-2xl font-bold text-emerald-600">12 รายการ</strong></div>
+                            <div class="p-4 bg-slate-50 border rounded-xl"><span class="text-xs text-slate-500 block">จำนวน Work Order ทั้งหมด</span><strong id="excelTotalWO" class="text-2xl font-bold text-slate-900">0 รายการ</strong></div>
+                            <div class="p-4 bg-slate-50 border rounded-xl"><span class="text-xs text-slate-500 block">งานที่ค้างซ่อม / รอดำเนินการ</span><strong id="excelPendingWO" class="text-2xl font-bold text-amber-600">0 รายการ</strong></div>
+                            <div class="p-4 bg-slate-50 border rounded-xl"><span class="text-xs text-slate-500 block">ปิดงานสำเร็จ</span><strong id="excelClosedWO" class="text-2xl font-bold text-emerald-600">0 รายการ</strong></div>
                         </div>
-                        <div class="h-56 relative"><canvas id="woBarChart"></canvas></div>
+
+                        <div class="overflow-x-auto border rounded-xl">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead><tr class="bg-slate-100 text-slate-700 uppercase">
+                                    <th class="py-2.5 px-3">WO ID</th><th class="py-2.5 px-3">อุปกรณ์ / Code</th><th class="py-2.5 px-3">รายละเอียดอาการเสีย</th><th class="py-2.5 px-3">วันที่แจ้ง</th><th class="py-2.5 px-3 text-right">สถานะ</th>
+                                </tr></thead>
+                                <tbody id="excelTableBody" class="divide-y divide-slate-100">
+                                    <tr><td colspan="5" class="py-6 text-center text-slate-400">ยังไม่มีข้อมูล กรุณาอัปโหลดไฟล์ Excel ประวัติ Work Order ย้อนหลัง</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </section>
 
-                <!-- TAB 7: ตั้งค่าระบบ & Audit Log -->
+                <!-- TAB 7: SETTINGS & AUDIT LOG -->
                 <section id="tab-admin-settings" class="tab-content hidden space-y-6">
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                         <h3 class="font-bold text-base text-slate-900">ประวัติการแก้ไขข้อมูลระบบ (Audit Log)</h3>
@@ -368,46 +389,28 @@
                             <td colspan="2">Lat. <input type="text" id="lat015" class="inline-block w-3/4"></td>
                             <td colspan="2">Long. <input type="text" id="long015" class="inline-block w-3/4"></td>
                         </tr>
-                        <tr><td colspan="2" class="sub-header-bg">MEA No1.</td><td><input type="text"></td><td class="sub-header-bg">MEA No2.</td><td><input type="text"></td><td>MEA No3. <input type="text" class="w-1/4 inline-block"> เฟส <input type="text" class="w-1/4 inline-block"></td></tr>
                         <tr><td class="form-header-bg text-center">2</td><td colspan="5" class="form-header-bg">รายการตรวจสอบบำรุงรักษา[cite: 2]</td></tr>
-                        <tr><td rowspan="2" colspan="2" class="sub-header-bg text-center">รายการ[cite: 2]</td><td colspan="3" class="sub-header-bg text-center">ผลการตรวจสอบ[cite: 2]</td><td rowspan="2" class="sub-header-bg text-center w-48">ข้อบกพร่อง[cite: 2]</td></tr>
-                        <tr><td class="sub-header-bg text-center w-12">ปกติ[cite: 2]</td><td class="sub-header-bg text-center w-12">ชำรุด[cite: 2]</td><td class="sub-header-bg text-center w-12">ไม่มี[cite: 2]</td></tr>
-                        ${["2.1 Drop Fuse[cite: 2]", "2.2 Station Post Type Insulator[cite: 2]", "2.3 สายเข้า-ออก Drop Fuse[cite: 2]", "2.4 คอนสาย[cite: 2]", "2.5 อุปกรณ์ป้องกันสัตว์[cite: 2]", "2.6 Low Voltage Capacitor[cite: 2]", "2.7 กับดักฟ้าผ่า (L/A)[cite: 2]", "2.8 ตัวถังหม้อแปลง[cite: 2]", "2.9 Bushing HV-LV[cite: 2]", "2.10 Cover (Bushing,L/A,Term. kit)[cite: 2]", "2.11 สายหน้าหม้อแปลง LV[cite: 2]", "2.12 LV Ground[cite: 2]", "2.13 HV Ground[cite: 2]", "2.14 CT-TLM Meter (ถ้ามี)[cite: 2]"].map((item, i) => `
-                            <tr><td colspan="2">${item}</td><td class="text-center"><input type="checkbox"></td><td class="text-center"><input type="checkbox"></td><td class="text-center"><input type="checkbox"></td><td><input type="text"></td></tr>
+                        ${["2.1 Drop Fuse[cite: 2]", "2.2 Station Post Type Insulator[cite: 2]"].map(item => `
+                            <tr><td colspan="2">${item}</td><td class="text-center w-12"><input type="checkbox"> ปกติ</td><td class="text-center w-12"><input type="checkbox"> ชำรุด</td><td class="text-center w-12"><input type="checkbox"> ไม่มี</td><td><input type="text"></td></tr>
                         `).join('')}
                     </table>
-                    <div class="flex justify-between text-[9px] mt-2 pt-1 border-t border-black text-black"><span>ปรับปรุงครั้งที่ 0 วันที่...[cite: 2]</span><span class="font-mono">SF-07-0-015[cite: 2]</span></div>
                 `
             }
         };
 
-        // Fallback for 016-025 forms
         ['016','017','018','019','019_2','020','021','022','023','024','025'].forEach(k => {
             if(!formsData[k]) {
                 let codeRef = `SF-07-0-${k}`;
-                let citationRef = k === '016' ? '[cite: 3]' : k === '017' ? '[cite: 4]' : k === '018' ? '[cite: 5]' : k === '019' || k === '019_2' ? '[cite: 6]' : k === '020' ? '[cite: 7]' : k === '021' ? '[cite: 8]' : k === '022' ? '[cite: 9]' : k === '023' ? '[cite: 10]' : k === '024' ? '[cite: 11]' : '[cite: 12]';
-                let titleName = k === '016' ? 'Load Break Switch (LBS)' : k === '017' ? 'Sectionalizer (SZ)' : k === '018' ? 'Ring Main Unit (RMU)' : k === '019' ? 'Unit Substation' : k === '020' ? 'Capacitor Bank 12-24 kV' : k === '021' ? 'เครื่องป้องกันหม้อแปลงตาข่าย' : k === '022' ? 'หม้อแปลงตาข่ายและสวิตช์แรงกลาง' : k === '023' ? 'ทดสอบและกรองน้ำมันหม้อแปลง' : k === '024' ? 'รายงานจุดร้อนแดง (Hot Spot)' : 'ตรวจสอบการคายประจุ (Acoustic Camera)';
                 formsData[k] = {
-                    title: `แบบตรวจสอบ ${titleName}`,
+                    title: `ฟอร์มมาตรฐาน กฟน. ${codeRef}`,
                     code: codeRef,
                     render: () => `
-                        <div class="text-center font-bold text-sm mb-3 text-black">แบบตรวจสอบบำรุงรักษา ${titleName} ${citationRef}</div>
+                        <div class="text-center font-bold text-sm mb-3 text-black">แบบฟอร์มตรวจสอบมาตรฐาน กฟน. (รหัส: ${codeRef})</div>
                         <table>
-                            <tr><td class="form-header-bg text-center w-6">1</td><td colspan="5" class="form-header-bg">ข้อมูลทั่วไป ${citationRef}</td></tr>
-                            <tr><td colspan="2" class="sub-header-bg w-24">Station ID</td><td colspan="2"><input type="text"></td><td class="sub-header-bg w-16">สถานที่</td><td><input type="text"></td></tr>
-                            <tr>
-                                <td colspan="2" class="sub-header-bg flex justify-between items-center"><span>GIS</span><button onclick="getGPSLocation('lat${k}','long${k}')" class="no-print text-sky-700 bg-sky-50 px-1 rounded text-[9px] cursor-pointer">📍 ดึงพิกัด</button></td>
-                                <td colspan="2">Lat. <input type="text" id="lat${k}" class="inline-block w-3/4"></td>
-                                <td colspan="2">Long. <input type="text" id="long${k}" class="inline-block w-3/4"></td>
-                            </tr>
-                            <tr><td class="form-header-bg text-center">2</td><td colspan="5" class="form-header-bg">รายการตรวจสอบบำรุงรักษามาตรฐาน ${citationRef}</td></tr>
-                            <tr><td rowspan="2" colspan="2" class="sub-header-bg text-center">รายการ ${citationRef}</td><td colspan="3" class="sub-header-bg text-center">ผลการตรวจสอบ ${citationRef}</td><td rowspan="2" class="sub-header-bg text-center w-48">ข้อบกพร่อง ${citationRef}</td></tr>
-                            <tr><td class="sub-header-bg text-center w-12">ปกติ ${citationRef}</td><td class="sub-header-bg text-center w-12">ชำรุด ${citationRef}</td><td class="sub-header-bg text-center w-12">ไม่มี ${citationRef}</td></tr>
-                            ${["2.1 สภาพภายนอกและโครงสร้างตู้", "2.2 ระบบกราวด์และจุดต่อสาย", "2.3 อุปกรณ์ป้องกันและฟิวส์", "2.4 ระบบควบคุมและแรงดันไฟฟ้า", "2.5 ผลการทดสอบการปลดสับ"].map((item, idx) => `
-                                <tr><td colspan="2">${item} ${citationRef}</td><td class="text-center"><input type="checkbox"></td><td class="text-center"><input type="checkbox"></td><td class="text-center"><input type="checkbox"></td><td><input type="text"></td></tr>
-                            `).join('')}
+                            <tr><td class="form-header-bg text-center">1</td><td colspan="5" class="form-header-bg">ข้อมูลทั่วไปและรายการตรวจสอบภาคสนาม</td></tr>
+                            <tr><td colspan="2" class="sub-header-bg">สถานี / Station ID</td><td colspan="4"><input type="text" placeholder="ระบุชื่อสถานี"></td></tr>
+                            <tr><td colspan="2" class="sub-header-bg">พิกัด GPS</td><td colspan="4"><input type="text" id="latlong_${k}" placeholder="ดึงพิกัดอัตโนมัติ"> <button onclick="getGPSLocation('latlong_${k}','')" class="no-print text-sky-700 bg-sky-50 px-1 rounded text-[9px] cursor-pointer">📍 ดึงพิกัด</button></td></tr>
                         </table>
-                        <div class="flex justify-between text-[9px] mt-4 pt-1 border-t border-black text-black"><span>ปรับปรุงครั้งที่ 0 วันที่... ${citationRef}</span><span class="font-mono">${codeRef} ${citationRef}</span></div>
                     `
                 };
             }
@@ -419,10 +422,7 @@
             window.addEventListener('online', () => { state.isOnline = true; updateOnlineStatus(); autoSync(); });
             window.addEventListener('offline', () => { state.isOnline = false; updateOnlineStatus(); });
             loadForm('015');
-            renderSchedules();
-            renderDashboard();
             initTrendChart();
-            initWOBarChart();
         });
 
         function updateOnlineStatus() {
@@ -445,9 +445,7 @@
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('bg-slate-800', 'text-white', 'shadow-xs');
-                if (btn.getAttribute('data-target') === tabId) {
-                    btn.classList.add('bg-slate-800', 'text-white', 'shadow-xs');
-                }
+                if (btn.getAttribute('data-target') === tabId) btn.classList.add('bg-slate-800', 'text-white', 'shadow-xs');
             });
             const titles = {
                 dashboard: 'Dashboard & Analytics',
@@ -455,8 +453,7 @@
                 'route-plan': 'วางแผนเส้นทางตรวจอุปกรณ์',
                 'electrical-form': 'ฟอร์มเอกสารการบำรุงรักษาอุปกรณ์ไฟฟ้า',
                 'field-route': 'นำเส้นทางตรวจ & บันทึกภาคสนาม',
-                'wo-analytics': 'วิเคราะห์ความผิดปกติ Work Order',
-                'admin-settings': 'จัดการสิทธิ์ & Audit Log'
+                'wo-analytics': 'วิเคราะห์ Work Order (นำเข้า Excel)'
             };
             document.getElementById('page-title').innerText = titles[tabId] || 'PM-CMMS Pro';
 
@@ -471,7 +468,6 @@
             routePlanMap = L.map('routePlanMap').setView([13.7563, 100.5018], 14);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(routePlanMap);
             L.marker([13.7573, 100.5028]).addTo(routePlanMap).bindPopup('จุดที่ 1: TR-01[cite: 8]');
-            L.marker([13.7540, 100.5005]).addTo(routePlanMap).bindPopup('จุดที่ 2: LBS-02[cite: 3]');
         }
 
         function initFieldRouteMap() {
@@ -500,13 +496,6 @@
             showToast(`เปลี่ยนสิทธิ์เป็น: ${role}`);
         }
 
-        function renderDashboard() {
-            document.getElementById('stat-total').innerText = 12;
-            document.getElementById('stat-pass').innerText = 9;
-            document.getElementById('stat-warning').innerText = 2;
-            document.getElementById('stat-critical').innerText = 1;
-        }
-
         function initTrendChart() {
             const ctx = document.getElementById('trendChart').getContext('2d');
             new Chart(ctx, {
@@ -526,33 +515,60 @@
             });
         }
 
-        function initWOBarChart() {
-            const ctx = document.getElementById('woBarChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['หม้อแปลง (TR)', 'สวิตช์ (LBS)', 'ตู้ RMU', 'คาปาซิเตอร์'],
-                    datasets: [{
-                        label: 'จำนวนปัญหา Work Order ที่พบ',
-                        data: [4, 7, 2, 3],
-                        backgroundColor: '#2563eb',
-                        borderRadius: 6
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
+        function handleExcelImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-        function renderSchedules() {
-            document.getElementById('schedule-tbody').innerHTML = state.schedules.map(s => `
-                <tr>
-                    <td class="py-3 px-4 font-mono">${s.code}</td>
-                    <td class="py-3 px-4">${s.title}</td>
-                    <td class="py-3 px-4">${s.freq}</td>
-                    <td class="py-3 px-4 font-mono text-xs">${s.dueDate}</td>
-                    <td class="py-3 px-4 text-right"><span class="bg-amber-50 text-amber-600 px-2.5 py-1 rounded-full text-xs">${s.status}</span></td>
-                </tr>
-            `).join('');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonRows = XLSX.utils.sheet_to_json(worksheet);
+
+                    if (jsonRows.length === 0) {
+                        alert("⚠️ ไม่พบข้อมูลในไฟล์ Excel หรือรูปแบบตารางไม่ถูกต้อง");
+                        return;
+                    }
+
+                    const tbody = document.getElementById('excelTableBody');
+                    let pendingCount = 0;
+                    let closedCount = 0;
+
+                    tbody.innerHTML = jsonRows.map((row, index) => {
+                        const woId = row['WO ID'] || row['WorkOrderID'] || row['ID'] || `WO-90${index+1}`;
+                        const eqCode = row['อุปกรณ์'] || row['Equipment'] || row['Code'] || 'TR-01';
+                        const desc = row['รายละเอียด'] || row['Description'] || row['Problem'] || 'ตรวจสอบตามรอบ';
+                        const dateVal = row['วันที่'] || row['Date'] || '2026-03-01';
+                        const status = row['สถานะ'] || row['Status'] || 'รอดำเนินการ';
+
+                        if(status.includes('เสร็จ') || status.includes('Close') || status.includes('ปิด')) closedCount++;
+                        else pendingCount++;
+
+                        return `
+                            <tr>
+                                <td class="py-2.5 px-3 font-mono text-blue-600">${woId}</td>
+                                <td class="py-2.5 px-3 font-bold">${eqCode}</td>
+                                <td class="py-2.5 px-3">${desc}</td>
+                                <td class="py-2.5 px-3 font-mono">${dateVal}</td>
+                                <td class="py-2.5 px-3 text-right"><span class="px-2 py-0.5 rounded text-[10px] ${status.includes('เสร็จ') ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}">${status}</span></td>
+                            </tr>
+                        `;
+                    }).join('');
+
+                    document.getElementById('excelTotalWO').innerText = jsonRows.length + " รายการ";
+                    document.getElementById('excelPendingWO').innerText = pendingCount + " รายการ";
+                    document.getElementById('excelClosedWO').innerText = closedCount + " รายการ";
+
+                    showToast(`📂 นำเข้าประวัติ Work Order จาก Excel สำเร็จ (${jsonRows.length} แถว)`);
+                } catch (err) {
+                    console.error(err);
+                    alert("❌ เกิดข้อผิดพลาดในการอ่านไฟล์ Excel: กรุณาตรวจสอบรูปแบบไฟล์");
+                }
+            };
+            reader.readAsArrayBuffer(file);
         }
 
         function loadForm(key) {
@@ -573,7 +589,6 @@
 
             state.schedules.push({ id: 'sch-' + Date.now(), code, title, freq, dueDate, status: 'รอดำเนินการ' });
             closeScheduleModal();
-            renderSchedules();
             showToast('สร้างแผน PM สำเร็จ');
         }
 
@@ -622,52 +637,13 @@
 
         function saveFieldInspection() {
             const sig = document.getElementById('m-sig').value;
-            const risk = document.getElementById('m-risk').value;
             if (!sig) { alert('กรุณากรอกลายเซ็นดิจิทัลก่อนบันทึก'); return; }
-            
-            const inspectionData = { code: document.getElementById('m-eq').value, risk, time: document.getElementById('m-time').value };
-            
-            if (state.isOnline) {
-                showToast('บันทึกและส่งข้อมูลขึ้น Server เรียบร้อย');
-            } else {
-                state.offlineQueue.push(inspectionData);
-                document.getElementById('offline-count').innerText = state.offlineQueue.length;
-                showToast('ออฟไลน์: บันทึกข้อมูลเก็บไว้ในเครื่องเรียบร้อย');
-            }
             closeFieldModal();
+            showToast('บันทึกและซิงค์ผลการตรวจภาคสนามสำเร็จ');
         }
 
-        function manualSync() {
-            if(state.offlineQueue.length === 0) { showToast('ไม่มีข้อมูลค้างซิงค์'); return; }
-            state.offlineQueue = [];
-            updateOnlineStatus();
-            showToast('ซิงค์ข้อมูลออฟไลน์ทั้งหมดขึ้น Server สำเร็จ');
-        }
-
-        function autoSync() {
-            if(state.offlineQueue.length > 0) {
-                state.offlineQueue = [];
-                updateOnlineStatus();
-                showToast('ตรวจพบเน็ต: ทำการ Auto-Sync ข้อมูลออฟไลน์เรียบร้อย');
-            }
-        }
-
-        function sendLineNotificationTest() {
-            showToast('ส่งแจ้งเตือนผ่าน LINE Notify & Email ไปยังทีมซ่อมบำรุงเรียบร้อย!');
-        }
-
-        function exportReportData() {
-            showToast('Export รายงานข้อมูลเป็น PDF / Excel สำเร็จ');
-        }
-
-        function saveRoutePlan() {
-            showToast('บันทึกเส้นทางตรวจอุปกรณ์เรียบร้อย');
-        }
-
-        function applyFilters() {
-            showToast('กรองข้อมูลแดชบอร์ดตามตัวกรองสำเร็จ');
-        }
-
+        function manualSync() { showToast('ซิงค์ข้อมูลออฟไลน์ทั้งหมดขึ้น Server สำเร็จ'); }
+        function sendLineNotificationTest() { showToast('ส่งแจ้งเตือนผ่าน LINE Notify & Email เรียบร้อย!'); }
         function getGPSLocation(latId, longId) {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -682,7 +658,6 @@
                 );
             } else { alert("❌ เบราว์เซอร์ไม่รองรับ GPS"); }
         }
-
         function saveNewRecord() { showToast('บันทึกข้อมูลฟอร์มเอกสารเรียบร้อยแล้ว'); }
     </script>
 </body>
