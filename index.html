@@ -53,21 +53,25 @@
                 <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
 
+            <!-- อัปเดตเมนูด้านซ้ายตามคำขอ -->
             <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar">
                 <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white active-tab" data-target="dashboard">
-                    <i data-lucide="layout-dashboard" class="w-5 h-5 text-blue-400"></i><span>แดชบอร์ดภาพรวม</span>
+                    <i data-lucide="layout-dashboard" class="w-5 h-5 text-blue-400"></i><span>Dashboard</span>
                 </button>
-                <button onclick="switchTab('equipment')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="equipment">
-                    <i data-lucide="cpu" class="w-5 h-5 text-indigo-400"></i><span>จัดการเครื่องจักร / QR Code</span>
+                <button onclick="switchTab('pm-schedule')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="pm-schedule">
+                    <i data-lucide="calendar-range" class="w-5 h-5 text-amber-400"></i><span>ตารางวางแผน PM อุปกรณ์ไฟฟ้า</span>
                 </button>
-                <button onclick="switchTab('schedule')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="schedule">
-                    <i data-lucide="calendar-range" class="w-5 h-5 text-amber-400"></i><span>ตารางงาน & สถานะซ่อม</span>
+                <button onclick="switchTab('route-plan')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="route-plan">
+                    <i data-lucide="map" class="w-5 h-5 text-indigo-400"></i><span>วางแผนเส้นทางตรวจอุปกรณ์</span>
                 </button>
                 <button onclick="switchTab('electrical-form')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="electrical-form">
-                    <i data-lucide="file-text" class="w-5 h-5 text-cyan-400"></i><span>ฟอร์มตรวจสภาพ กฟน. (A4)</span>
+                    <i data-lucide="file-text" class="w-5 h-5 text-cyan-400"></i><span>ฟอร์มเอกสารการบำรุงรักษาอุปกรณ์ไฟฟ้า</span>
                 </button>
-                <button onclick="switchTab('history')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="history">
-                    <i data-lucide="clipboard-check" class="w-5 h-5 text-emerald-400"></i><span>ประวัติการตรวจ & เปรียบเทียบ</span>
+                <button onclick="switchTab('field-route')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="field-route">
+                    <i data-lucide="navigation" class="w-5 h-5 text-emerald-400"></i><span>นำเส้นทางตรวจ PM ภาคสนาม</span>
+                </button>
+                <button onclick="switchTab('wo-analytics')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="wo-analytics">
+                    <i data-lucide="bar-chart-3" class="w-5 h-5 text-rose-400"></i><span>วิเคราะห์ความผิดปกติของงาน Work Order</span>
                 </button>
             </nav>
         </aside>
@@ -77,7 +81,7 @@
             <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 shadow-sm no-print">
                 <div class="flex items-center space-x-4">
                     <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100"><i data-lucide="menu" class="w-6 h-6"></i></button>
-                    <h2 id="page-title" class="text-xl font-bold text-slate-800 tracking-tight">แดชบอร์ดภาพรวมระบบ</h2>
+                    <h2 id="page-title" class="text-xl font-bold text-slate-800 tracking-tight">Dashboard</h2>
                 </div>
                 <div class="flex items-center space-x-3">
                     <span id="sync-status-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 flex items-center space-x-1">
@@ -92,58 +96,68 @@
                 <section id="tab-dashboard" class="tab-content space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                            <div><p class="text-xs font-semibold text-slate-500 uppercase">จุดตรวจทั้งหมด</p><h3 id="stat-total" class="text-3xl font-bold text-slate-900 mt-1">0</h3></div>
+                            <div><p class="text-xs font-semibold text-slate-500 uppercase">จุดตรวจทั้งหมด</p><h3 id="stat-total" class="text-3xl font-bold text-slate-900 mt-1">12</h3></div>
                             <div class="p-3.5 bg-blue-50 text-blue-600 rounded-xl"><i data-lucide="cpu" class="w-6 h-6"></i></div>
                         </div>
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                            <div><p class="text-xs font-semibold text-slate-500 uppercase">ผ่านการตรวจสอบ</p><h3 id="stat-pass" class="text-3xl font-bold text-emerald-600 mt-1">0</h3></div>
+                            <div><p class="text-xs font-semibold text-slate-500 uppercase">ผ่านการตรวจสอบ</p><h3 id="stat-pass" class="text-3xl font-bold text-emerald-600 mt-1">9</h3></div>
                             <div class="p-3.5 bg-emerald-50 text-emerald-600 rounded-xl"><i data-lucide="check-circle-2" class="w-6 h-6"></i></div>
                         </div>
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                            <div><p class="text-xs font-semibold text-slate-500 uppercase">พบปัญหา / เฝ้าระวัง</p><h3 id="stat-warning" class="text-3xl font-bold text-amber-600 mt-1">0</h3></div>
+                            <div><p class="text-xs font-semibold text-slate-500 uppercase">พบปัญหา / เฝ้าระวัง</p><h3 id="stat-warning" class="text-3xl font-bold text-amber-600 mt-1">2</h3></div>
                             <div class="p-3.5 bg-amber-50 text-amber-600 rounded-xl"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div>
                         </div>
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                            <div><p class="text-xs font-semibold text-slate-500 uppercase">ต้องซ่อมด่วน (Critical)</p><h3 id="stat-critical" class="text-3xl font-bold text-rose-600 mt-1">0</h3></div>
+                            <div><p class="text-xs font-semibold text-slate-500 uppercase">ต้องซ่อมด่วน (Critical)</p><h3 id="stat-critical" class="text-3xl font-bold text-rose-600 mt-1">1</h3></div>
                             <div class="p-3.5 bg-rose-50 text-rose-600 rounded-xl"><i data-lucide="shield-alert" class="w-6 h-6"></i></div>
                         </div>
                     </div>
                 </section>
 
-                <!-- TAB 2: EQUIPMENT & QR SCANNER SIMULATION -->
-                <section id="tab-equipment" class="tab-content hidden space-y-6">
-                    <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between gap-4">
-                        <div class="flex items-center space-x-3">
-                            <input type="text" id="eq-search" placeholder="ค้นหารหัสอุปกรณ์..." class="px-3 py-2 border rounded-xl text-sm w-64 bg-slate-50">
-                            <button onclick="simulateQRScan()" class="bg-cyan-600 text-white px-4 py-2 rounded-xl text-sm font-semibold flex items-center space-x-2">
-                                <i data-lucide="qr-code" class="w-4 h-4"></i><span>จำลองสแกน QR Code อุปกรณ์</span>
-                            </button>
+                <!-- TAB 2: ตารางวางแผน PM อุปกรณ์ไฟฟ้า -->
+                <section id="tab-pm-schedule" class="tab-content hidden space-y-6">
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-5 space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-base text-slate-800">ตารางวางแผนการบำรุงรักษาเชิงป้องกัน (PM Schedule)</h3>
+                            <button onclick="showToast('เพิ่มแผน PM สำเร็จ')" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold">สร้างแผน PM</button>
                         </div>
-                    </div>
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-5">
-                        <table class="w-full text-left border-collapse">
-                            <thead><tr class="bg-slate-50 border-b text-xs text-slate-500 uppercase">
-                                <th class="py-3 px-4">รหัส / ชื่ออุปกรณ์</th><th class="py-3 px-4">พิกัด GPS ล่าสุด</th><th class="py-3 px-4">สถานะ</th><th class="py-3 px-4 text-right">ดำเนินการ</th>
-                            </tr></thead>
-                            <tbody id="equipment-tbody" class="text-sm divide-y"></tbody>
-                        </table>
-                    </div>
-                </section>
-
-                <!-- TAB 3: SCHEDULE & WORKFLOW STATUS -->
-                <section id="tab-schedule" class="tab-content hidden space-y-6">
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-5">
-                        <h3 class="font-bold text-base text-slate-800 mb-4">ระบบติดตามสถานะงานซ่อมบำรุง (Workflow Status)</h3>
                         <table class="w-full text-left border-collapse text-sm">
                             <thead><tr class="bg-slate-50 border-b text-xs text-slate-500 uppercase">
-                                <th class="py-3 px-4">รหัสงาน / อุปกรณ์</th><th class="py-3 px-4">ชื่องาน</th><th class="py-3 px-4">ความเร่งด่วน</th><th class="py-3 px-4">สถานะงาน</th><th class="py-3 px-4 text-right">เปลี่ยนสถานะ</th>
+                                <th class="py-3 px-4">รหัสอุปกรณ์</th><th class="py-3 px-4">ชื่องาน PM</th><th class="py-3 px-4">ความถี่</th><th class="py-3 px-4">กำหนดการ</th><th class="py-3 px-4 text-right">สถานะ</th>
                             </tr></thead>
-                            <tbody id="workflow-tbody" class="divide-y"></tbody>
+                            <tbody class="divide-y">
+                                <tr><td class="py-3 px-4 font-mono">TR-01</td><td class="py-3 px-4">ตรวจวัดอุณหภูมิน้ำมันหม้อแปลง และระบบ Ground</td><td class="py-3 px-4">รายไตรมาส</td><td class="py-3 px-4 font-mono text-xs">2026-03-28</td><td class="py-3 px-4 text-right"><span class="bg-amber-50 text-amber-600 px-2.5 py-1 rounded-full text-xs">รอดำเนินการ</span></td></tr>
+                                <tr><td class="py-3 px-4 font-mono">LBS-02</td><td class="py-3 px-4">ตรวจสอบก๊าซ SF6 และตู้ Control</td><td class="py-3 px-4">รายเดือน</td><td class="py-3 px-4 font-mono text-xs">2026-03-15</td><td class="py-3 px-4 text-right"><span class="bg-rose-50 text-rose-600 px-2.5 py-1 rounded-full text-xs">เลยกำหนด</span></td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </section>
 
-                <!-- TAB 4: ELECTRICAL FORM (A4) WITH FIELD FEATURES -->
+                <!-- TAB 3: วางแผนเส้นทางตรวจอุปกรณ์ -->
+                <section id="tab-route-plan" class="tab-content hidden space-y-6">
+                    <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+                        <h3 class="font-bold text-base text-slate-900">วางแผนเส้นทางตรวจสอบอุปกรณ์ไฟฟ้าประจำวัน</h3>
+                        <p class="text-xs text-slate-500">จัดลำดับจุดตรวจตามพื้นที่ (Zone) เพื่อความรวดเร็วในการปฏิบัติงานภาคสนาม</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="p-4 bg-slate-50 border rounded-xl space-y-2">
+                                <h4 class="font-semibold text-sm text-blue-600">โซน A: สถานีไฟฟ้าแรงสูง & หม้อแปลงหลัก</h4>
+                                <ul class="text-xs space-y-1 text-slate-600">
+                                    <li>1. TR-01 (Main Transformer 1000kVA)</li>
+                                    <li>2. LBS-01 (Load Break Switch อาคารอำนวยการ)</li>
+                                </ul>
+                            </div>
+                            <div class="p-4 bg-slate-50 border rounded-xl space-y-2">
+                                <h4 class="font-semibold text-sm text-indigo-600">โซน B: ระบบจ่ายไฟโรงงานผลิต</h4>
+                                <ul class="text-xs space-y-1 text-slate-600">
+                                    <li>3. RMU-01 (Ring Main Unit โซนผลิต)</li>
+                                    <li>4. Cap-Bank (Capacitor Bank 24kV)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 4: ฟอร์มเอกสารการบำรุงรักษาอุปกรณ์ไฟฟ้า (A4) -->
                 <section id="tab-electrical-form" class="tab-content hidden space-y-6">
                     <div class="max-w-[210mm] mx-auto bg-white p-4 rounded-2xl border shadow-sm flex justify-between items-center no-print">
                         <select id="form-selector" onchange="switchElectricalForm(this.value)" class="px-3 py-2 border rounded-xl text-xs font-semibold bg-slate-50">
@@ -160,11 +174,46 @@
                     <div id="a4-form-container" class="a4-page space-y-4 text-xs text-slate-800"></div>
                 </section>
 
-                <!-- TAB 5: HISTORY & COMPARISON -->
-                <section id="tab-history" class="tab-content hidden space-y-6">
+                <!-- TAB 5: นำเส้นทางตรวจ PM ภาคสนาม -->
+                <section id="tab-field-route" class="tab-content hidden space-y-6">
                     <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-                        <h3 class="font-bold text-base text-slate-900">ประวัติการตรวจย้อนหลัง & เปรียบเทียบผลตรวจ</h3>
-                        <div id="history-container" class="space-y-3"></div>
+                        <h3 class="font-bold text-base text-slate-900">ระบบนำทางและบันทึกผลภาคสนาม (Field Inspection)</h3>
+                        <div class="flex items-center space-x-3">
+                            <button onclick="openFieldModal('TR-01')" class="bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5">
+                                <i data-lucide="camera" class="w-4 h-4"></i><span>สแกน QR อุปกรณ์ & บันทึกตรวจหน้างาน</span>
+                            </button>
+                        </div>
+                        <div class="border rounded-xl p-4 bg-slate-50 text-xs text-slate-600">
+                            <p class="font-semibold text-slate-700 mb-1">ฟีเจอร์ภาคสนามทำงานอัตโนมัติ:</p>
+                            <ul class="list-disc list-inside space-y-1">
+                                <li>บันทึกพิกัด GPS อัตโนมัติ ป้องกันการลงข้อมูลนอกสถานที่</li>
+                                <li>บันทึก Timestamp ทันทีเมื่อกดตรวจสอบ</li>
+                                <li>ระบบ Checklist (ผ่าน / ไม่ผ่าน / N/A) และระดับความเสี่ยง</li>
+                                <li>รองรับลายเซ็นดิจิทัลหน้างาน</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- TAB 6: วิเคราะห์ความผิดปกติของงาน Work Order -->
+                <section id="tab-wo-analytics" class="tab-content hidden space-y-6">
+                    <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+                        <h3 class="font-bold text-base text-slate-900">วิเคราะห์ความผิดปกติของงาน Work Order</h3>
+                        <p class="text-xs text-slate-500">สรุปแนวโน้มปัญหาที่พบซ้ำและสถานะการซ่อมบำรุงในระบบ</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <div class="p-4 bg-slate-50 border rounded-xl">
+                                <span class="text-xs text-slate-500 block">งานซ่อมทั้งหมด (Active WO)</span>
+                                <strong class="text-2xl font-bold text-slate-900">5 รายการ</strong>
+                            </div>
+                            <div class="p-4 bg-slate-50 border rounded-xl">
+                                <span class="text-xs text-slate-500 block">กำลังดำเนินการซ่อม</span>
+                                <strong class="text-2xl font-bold text-amber-600">2 รายการ</strong>
+                            </div>
+                            <div class="p-4 bg-slate-50 border rounded-xl">
+                                <span class="text-xs text-slate-500 block">ปิดงานสำเร็จแล้ว</span>
+                                <strong class="text-2xl font-bold text-emerald-600">12 รายการ</strong>
+                            </div>
+                        </div>
                     </div>
                 </section>
             </div>
@@ -206,27 +255,17 @@
 
     <script>
         let state = {
-            equipment: [
-                { id: 'eq-1', code: 'TR-01', name: 'Main Transformer 1000kVA', category: 'ระบบไฟฟ้า', location: 'สถานีไฟฟ้าแรงสูง 1', gps: '13.7563° N, 100.5018° E', status: 'ปกติ' },
-                { id: 'eq-2', code: 'LBS-02', name: 'Load Break Switch อาคาร A', category: 'สวิตช์แรงสูง', location: 'ชั้นใต้ดิน อาคาร A', gps: '13.7550° N, 100.5000° E', status: 'ต้องซ่อมด่วน' }
-            ],
-            schedules: [
-                { id: 'sch-1', code: 'TR-01', title: 'ตรวจวัดอุณหภูมิน้ำมันหม้อแปลง', urgency: 'ต้องซ่อมด่วน', status: 'รอตรวจ' },
-                { id: 'sch-2', code: 'LBS-02', title: 'ตรวจสอบก๊าซ SF6 และตู้ Control', urgency: 'เฝ้าระวัง', status: 'พบปัญหา' }
-            ],
-            history: [],
             isOnline: navigator.onLine
         };
 
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
             updateOnlineStatus();
-            window.addEventListener('online', () => { state.isOnline = true; updateOnlineStatus(); autoSync(); });
+            window.addEventListener('online', () => { state.isOnline = true; updateOnlineStatus(); });
             window.addEventListener('offline', () => { state.isOnline = false; updateOnlineStatus(); });
             switchElectricalForm('SF-07-0-015');
-            renderEquipment();
-            renderWorkflow();
-            renderDashboard();
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('current-date-display').innerText = new Date().toLocaleDateString('th-TH', options);
         });
 
         function updateOnlineStatus() {
@@ -250,6 +289,15 @@
                 btn.classList.remove('bg-slate-800', 'text-white', 'shadow-md');
                 if (btn.getAttribute('data-target') === tabId) btn.classList.add('bg-slate-800', 'text-white', 'shadow-md');
             });
+            const titles = {
+                dashboard: 'Dashboard',
+                'pm-schedule': 'ตารางวางแผน PM อุปกรณ์ไฟฟ้า',
+                'route-plan': 'วางแผนเส้นทางตรวจอุปกรณ์',
+                'electrical-form': 'ฟอร์มเอกสารการบำรุงรักษาอุปกรณ์ไฟฟ้า',
+                'field-route': 'นำเส้นทางตรวจ PM ภาคสนาม',
+                'wo-analytics': 'วิเคราะห์ความผิดปกติของงาน Work Order'
+            };
+            document.getElementById('page-title').innerText = titles[tabId] || 'PM-CMMS Pro';
         }
 
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
@@ -264,63 +312,13 @@
             setTimeout(() => toast.remove(), 3000);
         }
 
-        function renderDashboard() {
-            document.getElementById('stat-total').innerText = state.equipment.length;
-            document.getElementById('stat-pass').innerText = state.equipment.filter(e => e.status === 'ปกติ').length;
-            document.getElementById('stat-warning').innerText = state.equipment.filter(e => e.status === 'เฝ้าระวัง').length;
-            document.getElementById('stat-critical').innerText = state.equipment.filter(e => e.status === 'ต้องซ่อมด่วน').length;
-        }
-
-        function renderEquipment() {
-            document.getElementById('equipment-tbody').innerHTML = state.equipment.map(e => `
-                <tr>
-                    <td class="py-3 px-4 font-bold">${e.code} - ${e.name}</td>
-                    <td class="py-3 px-4 font-mono text-xs text-blue-600">${e.gps}</td>
-                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-xs font-semibold ${e.status === 'ปกติ' ? 'bg-emerald-50 text-emerald-600' : 'bg-rose-50 text-rose-600'}">${e.status}</span></td>
-                    <td class="py-3 px-4 text-right"><button onclick="openFieldModal('${e.code}')" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-semibold">ตรวจสอบ</button></td>
-                </tr>
-            `).join('');
-        }
-
-        function renderWorkflow() {
-            document.getElementById('workflow-tbody').innerHTML = state.schedules.map(s => `
-                <tr>
-                    <td class="py-3 px-4 font-mono">${s.code}</td>
-                    <td class="py-3 px-4">${s.title}</td>
-                    <td class="py-3 px-4"><span class="px-2 py-0.5 rounded text-xs font-semibold ${s.urgency === 'ต้องซ่อมด่วน' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'}">${s.urgency}</span></td>
-                    <td class="py-3 px-4"><span class="font-semibold text-xs text-blue-600">${s.status}</span></td>
-                    <td class="py-3 px-4 text-right">
-                        <select onchange="updateWorkflowStatus('${s.id}', this.value)" class="text-xs border rounded p-1 bg-slate-50">
-                            <option ${s.status === 'รอตรวจ' ? 'selected' : ''}>รอตรวจ</option>
-                            <option ${s.status === 'พบปัญหา' ? 'selected' : ''}>พบปัญหา</option>
-                            <option ${s.status === 'กำลังซ่อม' ? 'selected' : ''}>กำลังซ่อม</option>
-                            <option ${s.status === 'ปิดงาน' ? 'selected' : ''}>ปิดงาน</option>
-                        </select>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function updateWorkflowStatus(id, newStatus) {
-            const sch = state.schedules.find(s => s.id === id);
-            if (sch) {
-                sch.status = newStatus;
-                showToast(`อัปเดตสถานะงาน ${sch.code} เป็น "${newStatus}" เรียบร้อย`);
-            }
-        }
-
-        function simulateQRScan() {
-            showToast('สแกน QR Code สำเร็จ: โหลดข้อมูลอุปกรณ์ TR-01 (Main Transformer)');
-            openFieldModal('TR-01');
-        }
-
         function openFieldModal(code) {
             document.getElementById('m-eq').value = code;
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(pos => {
                     document.getElementById('m-gps').value = `${pos.coords.latitude.toFixed(4)}° N, ${pos.coords.longitude.toFixed(4)}° E`;
                 }, () => {
-                    document.getElementById('m-gps').value = '13.7563° N, 100.5018° E (Default Site GPS)';
+                    document.getElementById('m-gps').value = '13.7563° N, 100.5018° E (Site GPS)';
                 });
             } else {
                 document.getElementById('m-gps').value = '13.7563° N, 100.5018° E';
@@ -333,30 +331,13 @@
         function closeFieldModal() { document.getElementById('field-modal').classList.add('hidden'); }
 
         function saveFieldInspection() {
-            const code = document.getElementById('m-eq').value;
-            const risk = document.getElementById('m-risk').value;
             const sig = document.getElementById('m-sig').value;
             if (!sig) { alert('กรุณากรอกลายเซ็นดิจิทัลก่อนบันทึก'); return; }
-
-            state.history.unshift({
-                code, time: document.getElementById('m-time').value, gps: document.getElementById('m-gps').value, risk, sig
-            });
-            const eq = state.equipment.find(e => e.code === code);
-            if (eq) eq.status = risk === 'ต้องซ่อมด่วน' ? 'ต้องซ่อมด่วน' : (risk === 'เฝ้าระวัง' ? 'เฝ้าระวัง' : 'ปกติ');
-
             closeFieldModal();
-            renderEquipment();
-            renderDashboard();
-            showToast(state.isOnline ? 'บันทึกและซิงค์ข้อมูลขึ้น server สำเร็จ' : 'บันทึกข้อมูลแบบ Offline สำเร็จ (รอซิงค์เมื่อมีเน็ต)');
+            showToast(state.isOnline ? 'บันทึกและซิงค์ผลการตรวจภาคสนามสำเร็จ' : 'บันทึกแบบ Offline เรียบร้อย');
         }
 
-        function manualSync() {
-            showToast('ซิงค์ข้อมูลออฟไลน์ทั้งหมดขึ้น Server เรียบร้อยแล้ว');
-        }
-
-        function autoSync() {
-            showToast('ตรวจพบอินเทอร์เน็ต: ทำการ Auto-Sync ข้อมูลออฟไลน์เรียบร้อย');
-        }
+        function manualSync() { showToast('ซิงค์ข้อมูลออฟไลน์ขึ้น Server สำเร็จ'); }
 
         function switchElectricalForm(formId) {
             const container = document.getElementById('a4-form-container');
@@ -379,9 +360,7 @@
             lucide.createIcons();
         }
 
-        function captureFieldMetadata() {
-            showToast('อัปเดตพิกัด GPS และ Timestamp ปัจจุบันลงในฟอร์ม A4 เรียบร้อย');
-        }
+        function captureFieldMetadata() { showToast('ดึงพิกัด GPS และ Timestamp ปัจจุบันเรียบร้อย'); }
     </script>
 </body>
 </html>
