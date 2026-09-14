@@ -245,11 +245,11 @@
                         <div class="flex flex-wrap justify-between items-center gap-3 border-b border-slate-100 pb-4">
                             <div>
                                 <h3 class="font-bold text-base text-slate-900">วิเคราะห์ความผิดปกติ Work Order & นำเข้าไฟล์ Excel</h3>
-                                <p class="text-xs text-slate-500">อัปโหลดไฟล์ประวัติ Work Order รองรับทุกรูปแบบคอลัมน์ (ข้อมูลถูกบันทึกไว้ถาวรไม่หายตอนรีโหลด)</p>
+                                <p class="text-xs text-slate-500">อัปโหลดไฟล์ประวัติ Work Order (.xlsx, .xls) ระบบจะจดจำข้อมูลไว้ถาวรไม่หายตอนรีโหลด</p>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button onclick="sendLineNotificationTest()" class="px-3.5 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer shadow-sm">
-                                    <i data-lucide="send" class="w-4 h-4"></i><span>แจ้งเตือน LINE ด่วน</span>
+                                <button onclick="loadSampleExcelData()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer shadow-sm">
+                                    <i data-lucide="database" class="w-4 h-4"></i><span>📥 โหลดข้อมูลตัวอย่าง</span>
                                 </button>
                                 <label class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-2 cursor-pointer shadow-sm">
                                     <i data-lucide="file-spreadsheet" class="w-4 h-4"></i><span>📂 นำเข้า Excel WO</span>
@@ -270,7 +270,7 @@
                                     <th class="py-2.5 px-3">WO ID</th><th class="py-2.5 px-3">อุปกรณ์ / Code</th><th class="py-2.5 px-3">รายละเอียดอาการเสีย</th><th class="py-2.5 px-3">วันที่แจ้ง</th><th class="py-2.5 px-3 text-right">สถานะ</th>
                                 </tr></thead>
                                 <tbody id="excelTableBody" class="divide-y divide-slate-100">
-                                    <tr><td colspan="5" class="py-6 text-center text-slate-400">ยังไม่มีข้อมูล กรุณาอัปโหลดไฟล์ Excel ประวัติ Work Order ย้อนหลัง</td></tr>
+                                    <tr><td colspan="5" class="py-6 text-center text-slate-400">ยังไม่มีข้อมูล กรุณาอัปโหลดไฟล์ Excel หรือกด "โหลดข้อมูลตัวอย่าง" ด้านบน</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -541,7 +541,7 @@
             });
         }
 
-        // ฟังก์ชันอ่านไฟล์ Excel ยืดหยุ่น รองรับทุกหัวคอลัมน์ และบันทึกลง LocalStorage กันรีโหลดหาย
+        // ฟังก์ชันอ่านไฟล์ Excel แบบยืดหยุ่น รองรับทุกรูปแบบ และบันทึกกันรีโหลดหาย
         function handleExcelImport(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -560,8 +560,6 @@
                         return;
                     }
 
-                    // แปลงข้อมูลแบบยืดหยุ่น (รองรับทุกชื่อคอลัมน์)
-                    const headers = jsonRows[0];
                     const formattedRows = jsonRows.slice(1).map((row, index) => {
                         return {
                             woId: row[0] || `WO-90${index+1}`,
@@ -581,6 +579,18 @@
                 }
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        // ปุ่มโหลดข้อมูลตัวอย่าง กรณีไฟล์ Excel มีปัญหา
+        function loadSampleExcelData() {
+            const sampleData = [
+                { woId: 'WO-8801', eqCode: 'TR-01[cite: 8]', desc: 'อุณหภูมิน้ำมันสูงผิดปกติ', dateVal: '2026-03-10', status: 'กำลังดำเนินการ' },
+                { woId: 'WO-8802', eqCode: 'LBS-02[cite: 3]', desc: 'ตรวจสอบตู้ Control และก๊าซ SF6', dateVal: '2026-03-12', status: 'ปิดงานสำเร็จ' },
+                { woId: 'WO-8803', eqCode: 'RMU-01[cite: 5]', desc: 'เปลี่ยนแบตเตอรี่สำรองไฟ', dateVal: '2026-03-14', status: 'รอดำเนินการ' }
+            ];
+            localStorage.setItem('pm_excel_wo_data', JSON.stringify(sampleData));
+            renderExcelTable(sampleData);
+            showToast('📥 โหลดข้อมูลตัวอย่าง Work Order สำเร็จ');
         }
 
         function renderExcelTable(jsonRows) {
