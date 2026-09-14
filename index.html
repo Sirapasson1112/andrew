@@ -31,7 +31,7 @@
     <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
     <div id="offline-banner" class="bg-amber-500 text-slate-950 px-4 py-1.5 text-xs font-semibold text-center hidden no-print flex items-center justify-center space-x-2">
         <i data-lucide="wifi-off" class="w-4 h-4"></i>
-        <span>กำลังทำงานในโหมดออฟไลน์ (ข้อมูลจะถูกซิงค์อัตโนมัติเมื่อมีอินเทอร์เน็ต)</span>
+        <span>กำลังทำงานในโหมดออฟไลน์ (ข้อมูลจะถูกบันทึกและซิงค์อัตโนมัติเมื่อเชื่อมต่ออินเทอร์เน็ต)</span>
         <button onclick="manualSync()" class="underline ml-2 bg-amber-600 text-white px-2 py-0.5 rounded">ซิงค์ทันที</button>
     </div>
 
@@ -53,7 +53,6 @@
                 <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
 
-            <!-- อัปเดตเมนูด้านซ้ายตามคำขอ -->
             <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar">
                 <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white active-tab" data-target="dashboard">
                     <i data-lucide="layout-dashboard" class="w-5 h-5 text-blue-400"></i><span>Dashboard</span>
@@ -96,19 +95,19 @@
                 <section id="tab-dashboard" class="tab-content space-y-6">
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                            <div><p class="text-xs font-semibold text-slate-500 uppercase">จุดตรวจทั้งหมด</p><h3 id="stat-total" class="text-3xl font-bold text-slate-900 mt-1">12</h3></div>
+                            <div><p class="text-xs font-semibold text-slate-500 uppercase">จุดตรวจทั้งหมด</p><h3 id="stat-total" class="text-3xl font-bold text-slate-900 mt-1">0</h3></div>
                             <div class="p-3.5 bg-blue-50 text-blue-600 rounded-xl"><i data-lucide="cpu" class="w-6 h-6"></i></div>
                         </div>
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                            <div><p class="text-xs font-semibold text-slate-500 uppercase">ผ่านการตรวจสอบ</p><h3 id="stat-pass" class="text-3xl font-bold text-emerald-600 mt-1">9</h3></div>
+                            <div><p class="text-xs font-semibold text-slate-500 uppercase">ผ่านการตรวจสอบ</p><h3 id="stat-pass" class="text-3xl font-bold text-emerald-600 mt-1">0</h3></div>
                             <div class="p-3.5 bg-emerald-50 text-emerald-600 rounded-xl"><i data-lucide="check-circle-2" class="w-6 h-6"></i></div>
                         </div>
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                            <div><p class="text-xs font-semibold text-slate-500 uppercase">พบปัญหา / เฝ้าระวัง</p><h3 id="stat-warning" class="text-3xl font-bold text-amber-600 mt-1">2</h3></div>
+                            <div><p class="text-xs font-semibold text-slate-500 uppercase">พบปัญหา / เฝ้าระวัง</p><h3 id="stat-warning" class="text-3xl font-bold text-amber-600 mt-1">0</h3></div>
                             <div class="p-3.5 bg-amber-50 text-amber-600 rounded-xl"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div>
                         </div>
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-                            <div><p class="text-xs font-semibold text-slate-500 uppercase">ต้องซ่อมด่วน (Critical)</p><h3 id="stat-critical" class="text-3xl font-bold text-rose-600 mt-1">1</h3></div>
+                            <div><p class="text-xs font-semibold text-slate-500 uppercase">ต้องซ่อมด่วน (Critical)</p><h3 id="stat-critical" class="text-3xl font-bold text-rose-600 mt-1">0</h3></div>
                             <div class="p-3.5 bg-rose-50 text-rose-600 rounded-xl"><i data-lucide="shield-alert" class="w-6 h-6"></i></div>
                         </div>
                     </div>
@@ -119,16 +118,15 @@
                     <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-5 space-y-4">
                         <div class="flex justify-between items-center">
                             <h3 class="font-bold text-base text-slate-800">ตารางวางแผนการบำรุงรักษาเชิงป้องกัน (PM Schedule)</h3>
-                            <button onclick="showToast('เพิ่มแผน PM สำเร็จ')" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold">สร้างแผน PM</button>
+                            <button onclick="openScheduleModal()" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5">
+                                <i data-lucide="plus" class="w-4 h-4"></i><span>สร้างแผน PM</span>
+                            </button>
                         </div>
                         <table class="w-full text-left border-collapse text-sm">
                             <thead><tr class="bg-slate-50 border-b text-xs text-slate-500 uppercase">
                                 <th class="py-3 px-4">รหัสอุปกรณ์</th><th class="py-3 px-4">ชื่องาน PM</th><th class="py-3 px-4">ความถี่</th><th class="py-3 px-4">กำหนดการ</th><th class="py-3 px-4 text-right">สถานะ</th>
                             </tr></thead>
-                            <tbody class="divide-y">
-                                <tr><td class="py-3 px-4 font-mono">TR-01</td><td class="py-3 px-4">ตรวจวัดอุณหภูมิน้ำมันหม้อแปลง และระบบ Ground</td><td class="py-3 px-4">รายไตรมาส</td><td class="py-3 px-4 font-mono text-xs">2026-03-28</td><td class="py-3 px-4 text-right"><span class="bg-amber-50 text-amber-600 px-2.5 py-1 rounded-full text-xs">รอดำเนินการ</span></td></tr>
-                                <tr><td class="py-3 px-4 font-mono">LBS-02</td><td class="py-3 px-4">ตรวจสอบก๊าซ SF6 และตู้ Control</td><td class="py-3 px-4">รายเดือน</td><td class="py-3 px-4 font-mono text-xs">2026-03-15</td><td class="py-3 px-4 text-right"><span class="bg-rose-50 text-rose-600 px-2.5 py-1 rounded-full text-xs">เลยกำหนด</span></td></tr>
-                            </tbody>
+                            <tbody id="schedule-tbody" class="divide-y"></tbody>
                         </table>
                     </div>
                 </section>
@@ -220,6 +218,23 @@
         </main>
     </div>
 
+    <!-- MODAL: SCHEDULE ADD -->
+    <div id="schedule-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
+            <h3 class="font-bold text-lg text-slate-900">สร้างแผนงาน PM ใหม่</h3>
+            <form id="schedule-form" onsubmit="saveSchedule(event)" class="space-y-3 text-sm">
+                <div><label class="block text-xs font-semibold">รหัสอุปกรณ์:</label><input type="text" id="sch-code" required class="w-full px-3 py-1.5 border rounded-lg" placeholder="เช่น TR-01"></div>
+                <div><label class="block text-xs font-semibold">ชื่องาน PM:</label><input type="text" id="sch-title" required class="w-full px-3 py-1.5 border rounded-lg" placeholder="ชื่องาน"></div>
+                <div><label class="block text-xs font-semibold">ความถี่:</label><input type="text" id="sch-freq" required class="w-full px-3 py-1.5 border rounded-lg" value="รายเดือน"></div>
+                <div><label class="block text-xs font-semibold">กำหนดการ:</label><input type="date" id="sch-date" required class="w-full px-3 py-1.5 border rounded-lg"></div>
+                <div class="pt-2 flex justify-end space-x-2">
+                    <button type="button" onclick="closeScheduleModal()" class="px-4 py-2 border rounded-xl text-xs">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold">บันทึกแผนงาน</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL: FIELD INSPECTION & CHECKLIST -->
     <div id="field-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-6 space-y-4">
@@ -255,6 +270,9 @@
 
     <script>
         let state = {
+            schedules: [
+                { id: 'sch-1', code: 'TR-01', title: 'ตรวจวัดอุณหภูมิน้ำมันหม้อแปลง', freq: 'รายไตรมาส', dueDate: '2026-03-28', status: 'รอดำเนินการ' }
+            ],
             isOnline: navigator.onLine
         };
 
@@ -264,6 +282,8 @@
             window.addEventListener('online', () => { state.isOnline = true; updateOnlineStatus(); });
             window.addEventListener('offline', () => { state.isOnline = false; updateOnlineStatus(); });
             switchElectricalForm('SF-07-0-015');
+            renderSchedules();
+            renderDashboard();
             const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
             document.getElementById('current-date-display').innerText = new Date().toLocaleDateString('th-TH', options);
         });
@@ -310,6 +330,41 @@
             container.appendChild(toast);
             lucide.createIcons();
             setTimeout(() => toast.remove(), 3000);
+        }
+
+        function renderDashboard() {
+            document.getElementById('stat-total').innerText = 12;
+            document.getElementById('stat-pass').innerText = 9;
+            document.getElementById('stat-warning').innerText = 2;
+            document.getElementById('stat-critical').innerText = 1;
+        }
+
+        function renderSchedules() {
+            document.getElementById('schedule-tbody').innerHTML = state.schedules.map(s => `
+                <tr>
+                    <td class="py-3 px-4 font-mono">${s.code}</td>
+                    <td class="py-3 px-4">${s.title}</td>
+                    <td class="py-3 px-4">${s.freq}</td>
+                    <td class="py-3 px-4 font-mono text-xs">${s.dueDate}</td>
+                    <td class="py-3 px-4 text-right"><span class="bg-amber-50 text-amber-600 px-2.5 py-1 rounded-full text-xs">${s.status}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        function openScheduleModal() { document.getElementById('schedule-modal').classList.remove('hidden'); }
+        function closeScheduleModal() { document.getElementById('schedule-modal').classList.add('hidden'); }
+
+        function saveSchedule(e) {
+            e.preventDefault();
+            const code = document.getElementById('sch-code').value;
+            const title = document.getElementById('sch-title').value;
+            const freq = document.getElementById('sch-freq').value;
+            const dueDate = document.getElementById('sch-date').value;
+
+            state.schedules.push({ id: 'sch-' + Date.now(), code, title, freq, dueDate, status: 'รอดำเนินการ' });
+            closeScheduleModal();
+            renderSchedules();
+            showToast('สร้างแผน PM สำเร็จ');
         }
 
         function openFieldModal(code) {
