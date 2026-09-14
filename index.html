@@ -60,7 +60,6 @@
                 <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
 
-            <!-- Sidebar Menu ตามคำขอ -->
             <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar">
                 <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white active-tab" data-target="dashboard">
                     <i data-lucide="layout-dashboard" class="w-5 h-5 text-blue-400"></i><span>Dashboard</span>
@@ -169,7 +168,7 @@
 
                 <!-- TAB 4: ฟอร์มเอกสารการบำรุงรักษาอุปกรณ์ไฟฟ้า (บูรณาการฟอร์ม 11 แบบ A4 ของ กฟน.) -->
                 <section id="tab-electrical-form" class="tab-content hidden space-y-6">
-                    <!-- Action Toolbar สำหรับฟอร์มเอกสาร -->
+                    <!-- Action Toolbar สำหรับเลือกฟอร์ม (ครบถ้วน 11 แบบ) -->
                     <div class="max-w-[210mm] mx-auto bg-white p-4 rounded-2xl border border-slate-300 shadow-xs flex flex-wrap items-center justify-between gap-3 no-print">
                         <div class="flex items-center gap-2">
                             <select id="formSelector" onchange="loadForm(this.value)" class="px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold bg-slate-50 text-slate-800">
@@ -311,28 +310,55 @@
                     <div class="text-center font-bold text-sm mb-3 text-black">แบบตรวจสอบบำรุงรักษาหม้อแปลงจำหน่าย</div>
                     <table>
                         <tr><td class="form-header-bg text-center w-6">1</td><td colspan="5" class="form-header-bg">ข้อมูลทั่วไป</td></tr>
-                        <tr>
-                            <td colspan="2" class="sub-header-bg w-24">Station ID</td><td colspan="2"><input type="text"></td>
-                            <td class="sub-header-bg w-16">สถานที่</td><td><input type="text"></td>
-                        </tr>
+                        <tr><td colspan="2" class="sub-header-bg w-24">Station ID</td><td colspan="2"><input type="text"></td><td class="sub-header-bg w-16">สถานที่</td><td><input type="text"></td></tr>
                         <tr>
                             <td colspan="2" class="sub-header-bg flex justify-between items-center"><span>GIS</span><button onclick="getGPSLocation('lat015','long015')" class="no-print text-sky-700 bg-sky-50 px-1 rounded text-[9px] cursor-pointer">📍 ดึงพิกัด</button></td>
                             <td colspan="2">Lat. <input type="text" id="lat015" class="inline-block w-3/4"></td>
                             <td colspan="2">Long. <input type="text" id="long015" class="inline-block w-3/4"></td>
                         </tr>
-                        <tr>
-                            <td colspan="2" class="sub-header-bg">MEA No1.</td><td><input type="text"></td>
-                            <td class="sub-header-bg">MEA No2.</td><td><input type="text"></td>
-                            <td>MEA No3. <input type="text" class="w-1/4 inline-block"> จำนวนเฟส <input type="text" class="w-1/4 inline-block"></td>
-                        </tr>
+                        <tr><td colspan="2" class="sub-header-bg">MEA No1.</td><td><input type="text"></td><td class="sub-header-bg">MEA No2.</td><td><input type="text"></td><td>MEA No3. <input type="text" class="w-1/4 inline-block"> เฟส <input type="text" class="w-1/4 inline-block"></td></tr>
+                        <tr><td colspan="2" class="sub-header-bg">ยี่ห้อ</td><td><input type="text"></td><td class="sub-header-bg">ยี่ห้อ</td><td><input type="text"></td><td>ขนาด <input type="text" class="w-1/2 inline-block"></td></tr>
+                        <tr><td colspan="2" class="sub-header-bg">ชนิด</td><td colspan="2"><input type="text"></td><td class="sub-header-bg">ลักษณะการติดตั้ง</td><td><input type="text"></td></tr>
                         <tr><td class="form-header-bg text-center">2</td><td colspan="5" class="form-header-bg">รายการตรวจสอบบำรุงรักษา</td></tr>
                         <tr><td rowspan="2" colspan="2" class="sub-header-bg text-center">รายการ</td><td colspan="3" class="sub-header-bg text-center">ผลการตรวจสอบ</td><td rowspan="2" class="sub-header-bg text-center w-48">ข้อบกพร่อง</td></tr>
                         <tr><td class="sub-header-bg text-center w-12">ปกติ</td><td class="sub-header-bg text-center w-12">ชำรุด</td><td class="sub-header-bg text-center w-12">ไม่มี</td></tr>
                         ${["2.1 Drop Fuse", "2.2 Station Post Type Insulator", "2.3 สายเข้า-ออก Drop Fuse", "2.4 คอนสาย", "2.5 อุปกรณ์ป้องกันสัตว์", "2.6 Low Voltage Capacitor", "2.7 กับดักฟ้าผ่า (L/A)", "2.8 ตัวถังหม้อแปลง", "2.9 Bushing HV-LV", "2.10 Cover (Bushing,L/A,Term. kit)", "2.11 สายหน้าหม้อแปลง LV", "2.12 LV Ground", "2.13 HV Ground", "2.14 CT-TLM Meter (ถ้ามี)"].map((item, i) => `
                             <tr><td colspan="2">${item}</td><td class="text-center"><input type="checkbox"></td><td class="text-center"><input type="checkbox"></td><td class="text-center"><input type="checkbox"></td><td><input type="text"></td></tr>
                         `).join('')}
+                        <tr><td class="form-header-bg text-center">3</td><td colspan="5" class="form-header-bg">ตรวจสอบวัดกระแสและแรงดันไฟฟ้า</td></tr>
+                        <tr><td colspan="6" class="p-1.5"><label><input type="checkbox"> กลางวัน</label> <label><input type="checkbox"> กลางคืน</label> เวลา : <input type="text" class="border-b border-black w-24 inline-block"> วิธีการ: <label><input type="checkbox"> วัดหน้างาน</label> <label><input type="checkbox"> TLM</label></td></tr>
+                        <tr><td class="form-header-bg text-center">4</td><td colspan="5" class="form-header-bg">สิ่งที่ต้องปรับปรุงหรือข้อมูลเพิ่มเติม :</td></tr>
+                        <tr><td colspan="6" class="h-6"><textarea class="w-full border-0 outline-none text-[10px] resize-none h-5 bg-transparent"></textarea></td></tr>
+                        <tr><td class="form-header-bg text-center">5</td><td colspan="5" class="form-header-bg">การปรับปรุงข้อบกพร่อง :</td></tr>
+                        <tr><td colspan="6" class="h-6"><textarea class="w-full border-0 outline-none text-[10px] resize-none h-5 bg-transparent"></textarea></td></tr>
                     </table>
-                    <div class="flex justify-between text-[9px] mt-2 pt-1 border-t border-black text-black"><span>ปรับปรุงครั้งที่ 0 วันที่ ...</span><span class="font-mono">SF-07-0-015</span></div>
+                    <table class="mt-2">
+                        <tr><td colspan="3">ผู้ตรวจ <input type="text" class="border-b border-black w-3/4 inline-block"></td><td colspan="3">ผู้ตรวจสอบ <input type="text" class="border-b border-black w-3/4 inline-block"></td></tr>
+                        <tr><td colspan="3">ตำแหน่ง <input type="text" class="border-b border-black w-3/4 inline-block"></td><td colspan="3">ตำแหน่ง <input type="text" class="border-b border-black w-3/4 inline-block"></td></tr>
+                        <tr><td colspan="3">วันที่ <input type="date" class="border-b border-black w-3/4 inline-block"></td><td colspan="3">วันที่ <input type="date" class="border-b border-black w-3/4 inline-block"></td></tr>
+                    </table>
+                    <div class="flex justify-between text-[9px] mt-2 pt-1 border-t border-black text-black"><span>ปรับปรุงครั้งที่ 0 วันที่...</span><span class="font-mono">SF-07-0-015</span></div>
+                `
+            },
+            "016": {
+                title: "แบบตรวจสอบบำรุงรักษา Load Break Switch",
+                code: "SF-07-0-016",
+                render: () => `
+                    <div class="text-center font-bold text-sm mb-2 text-black">แบบตรวจสอบบำรุงรักษา Load Break Switch</div>
+                    <table>
+                        <tr><td class="form-header-bg text-center w-6">1</td><td colspan="5" class="form-header-bg">ข้อมูลทั่วไป</td></tr>
+                        <tr><td colspan="2" class="sub-header-bg w-28">Station ID</td><td colspan="2"><input type="text"></td><td class="sub-header-bg flex justify-between items-center"><span>GIS Lat/Long</span><button onclick="getGPSLocation('lat016','long016')" class="no-print text-sky-700 bg-sky-50 px-1 rounded text-[9px] cursor-pointer">📍 ดึงพิกัด</button></td><td>Lat: <input type="text" id="lat016" class="w-12 inline-block"> Long: <input type="text" id="long016" class="w-12 inline-block"></td></tr>
+                        <tr><td colspan="2" class="sub-header-bg">สถานที่</td><td colspan="4"><input type="text"></td></tr>
+                        <tr><td colspan="2" class="sub-header-bg">ยี่ห้อ LBS</td><td><input type="text"></td><td class="sub-header-bg">LBS MEA No.</td><td><input type="text"></td><td>Switch No. <input type="text" class="w-1/2 inline-block"></td></tr>
+                        <tr><td class="form-header-bg text-center">2</td><td colspan="5" class="form-header-bg">รายการตรวจสอบบำรุงรักษา</td></tr>
+                        <tr><td colspan="6" class="p-1">- สถานะสวิตช์: [ ] ปลด [ ] สับ &nbsp;&nbsp;&nbsp;&nbsp; - สถานะ SCADA: [ ] online [ ] offline</td></tr>
+                        <tr><td rowspan="2" colspan="2" class="sub-header-bg text-center">รายการ</td><td colspan="3" class="sub-header-bg text-center">ผลการตรวจสอบ</td><td rowspan="2" class="sub-header-bg text-center w-48">ข้อบกพร่อง</td></tr>
+                        <tr><td class="sub-header-bg text-center w-12">ปกติ</td><td class="sub-header-bg text-center w-12">ชำรุด</td><td class="sub-header-bg text-center w-12">ไม่มี</td></tr>
+                        ${["2.1 ตัวถัง LBS /สลักล็อคการปลดสับ", "2.2 สถานะก๊าซ SF6", "2.3 Bushing", "2.4 กับดักฟ้าผ่า", "2.5 VT", "2.6 Drop Fuse ลง VT", "2.7 คอนสาย", "2.8 สายควบคุม LBS", "2.9 อุปกรณ์ป้องกันสัตว์", "2.10 ไฟสถานะหน้าตู้", "2.11 แหล่งจ่ายไฟฟ้า และสายควบคุม", "2.12 สภาพแบตเตอรี่หรือ Capacitor", "2.13 Ground HV (L/A, LBS)", "2.14 Ground LV (ดู Control)", "2.15 ทดสอบ ทาง Remote", "2.16 ทดสอบ ทาง Local", "2.17 แรงดันไฟฟ้าเลี้ยงอุปกรณ์", "2.18 การทดสอบ ATS"].map((item, i) => `
+                            <tr><td colspan="2">${item}</td><td class="text-center"><input type="checkbox"></td><td class="text-center"><input type="checkbox"></td><td class="text-center"><input type="checkbox"></td><td><input type="text"></td></tr>
+                        `).join('')}
+                    </table>
+                    <div class="flex justify-between text-[9px] mt-2 pt-1 border-t border-black text-black"><span>ปรับปรุงครั้งที่ 0 วันที่....</span><span class="font-mono">SF-07-0-016</span></div>
                 `
             },
             "025": {
@@ -342,17 +368,43 @@
                     <div class="text-center font-bold text-sm mb-2 text-black">รายงานผลการตรวจสอบการคายประจุไฟฟ้าบางส่วน (Partial Discharge)<br>โดยใช้กล้อง Acoustic Camera</div>
                     <table>
                         <tr><td class="sub-header-bg w-20">Station ID</td><td><input type="text"></td><td class="sub-header-bg w-20">อุปกรณ์</td><td><input type="text"></td><td class="sub-header-bg w-20">MEA No.</td><td><input type="text"></td></tr>
+                        <tr><td class="sub-header-bg">สถานที่</td><td colspan="3"><input type="text"></td><td class="sub-header-bg">สายป้อน</td><td><input type="text"></td></tr>
                         <tr>
                             <td class="sub-header-bg flex justify-between items-center"><span>GIS</span><button onclick="getGPSLocation('lat025','long025')" class="no-print text-sky-700 bg-sky-50 px-1 rounded text-[9px] cursor-pointer">📍 ดึงพิกัด</button></td>
                             <td colspan="2">Lat. <input type="text" id="lat025"></td>
                             <td colspan="3">Long. <input type="text" id="long025"></td>
                         </tr>
-                        <tr><td colspan="6" class="p-2">ระดับความเข้มเสียงที่ตรวจวัดได้ : <input type="text" class="border-b border-black w-24 inline-block"> dB</td></tr>
+                        <tr><td colspan="6" class="p-2">ระดับความเข้มเสียงที่ตรวจวัดได้ : <input type="text" class="border-b border-black w-24 inline-block"> dB[cite: 12]</td></tr>
+                        <tr><td colspan="6" class="p-2">ระดับความรุนแรง *[cite: 12] [ ] สูงมาก [ ] สูง [ ] ปานกลาง [ ] ต่ำ</td></tr>
                     </table>
                     <div class="flex justify-between text-[9px] mt-2 pt-1 border-t border-black text-black"><span>ปรับปรุงครั้งที่ 0 วันที่...</span><span class="font-mono">SF-07-0-025</span></div>
                 `
             }
         };
+
+        // Fallback mapping สำหรับฟอร์ม 017-024 ให้ดึงโครงสร้างพื้นฐานได้ไม่โล่ง
+        ['017','018','019','019_2','020','021','022','023','024'].forEach(k => {
+            if(!formsData[k]) {
+                formsData[k] = {
+                    title: "แบบฟอร์มตรวจสอบมาตรฐาน กฟน.",
+                    code: `SF-07-0-${k}`,
+                    render: () => `
+                        <div class="text-center font-bold text-sm mb-3 text-black">แบบฟอร์มมาตรฐาน กฟน. (รหัส: SF-07-0-${k})</div>
+                        <table>
+                            <tr><td class="form-header-bg text-center">1</td><td colspan="5" class="form-header-bg">ข้อมูลทั่วไปและรายการตรวจสอบภาคสนาม</td></tr>
+                            <tr><td colspan="2" class="sub-header-bg">สถานี / Station ID</td><td colspan="4"><input type="text" placeholder="ระบุชื่อสถานี"></td></tr>
+                            <tr><td colspan="2" class="sub-header-bg">พิกัด GPS</td><td colspan="4"><input type="text" id="latlong_${k}" placeholder="กดปุ่มดึงพิกัดอัตโนมัติ"> <button onclick="getGPSLocation('latlong_${k}','')" class="no-print text-sky-700 bg-sky-50 px-1 rounded text-[9px] cursor-pointer">📍 ดึงพิกัด</button></td></tr>
+                            <tr><td rowspan="10" class="sub-header-bg text-center">รายการตรวจสอบหลักตามมาตรฐาน</td><td colspan="5"><input type="checkbox"> 1. สภาพภายนอกและโครงสร้างตู้/อุปกรณ์</td></tr>
+                            <tr><td colspan="5"><input type="checkbox"> 2. ระบบกราวด์และจุดต่อทางไฟฟ้า</td></tr>
+                            <tr><td colspan="5"><input type="checkbox"> 3. ระบบควบคุมและการจ่ายไฟเลี้ยง (Control/Supply)</td></tr>
+                            <tr><td colspan="5"><input type="checkbox"> 4. การทดสอบระบบปลด-สับ (Remote / Local)</td></tr>
+                            <tr><td colspan="5"><input type="checkbox"> 5. ตรวจสอบอุณหภูมิและความผิดปกติ (Thermo/Acoustic)</td></tr>
+                        </table>
+                        <div class="flex justify-between text-[9px] mt-4 pt-1 border-t border-black text-black"><span>มาตรฐาน กฟน. ภาคสนาม</span><span class="font-mono">SF-07-0-${k}</span></div>
+                    `
+                };
+            }
+        });
 
         window.addEventListener('DOMContentLoaded', () => {
             lucide.createIcons();
@@ -474,6 +526,23 @@
             if (!sig) { alert('กรุณากรอกลายเซ็นดิจิทัลก่อนบันทึก'); return; }
             closeFieldModal();
             showToast(state.isOnline ? 'บันทึกและซิงค์ผลการตรวจภาคสนามสำเร็จ' : 'บันทึกแบบ Offline เรียบร้อย');
+        }
+
+        function getGPSLocation(latId, longId) {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude.toFixed(6);
+                        const lon = position.coords.longitude.toFixed(6);
+                        const latInput = document.getElementById(latId);
+                        const longInput = document.getElementById(longId);
+                        if (latInput) latInput.value = lat;
+                        if (longInput) longInput.value = lon;
+                        showToast("📍 ดึงพิกัด GPS สำเร็จ: " + lat + ", " + lon);
+                    },
+                    (error) => { alert("⚠️ ไม่สามารถดึงพิกัดได้: กรุณาอนุญาตการเข้าถึงตำแหน่ง GPS"); }
+                );
+            } else { alert("❌ เบราว์เซอร์ของคุณไม่รองรับการระบุตำแหน่ง GPS"); }
         }
 
         function manualSync() { showToast('ซิงค์ข้อมูลออฟไลน์ขึ้น Server สำเร็จ'); }
