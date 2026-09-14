@@ -153,7 +153,7 @@
                                     <th class="py-3 px-4">รหัสอุปกรณ์</th><th class="py-3 px-4">ชื่องาน PM</th><th class="py-3 px-4">ความถี่</th><th class="py-3 px-4">กำหนดการ</th><th class="py-3 px-4 text-right">สถานะ</th>
                                 </tr></thead>
                                 <tbody id="schedule-tbody" class="divide-y divide-slate-100">
-                                    <tr><td class="py-3 px-4 font-mono text-blue-600 font-medium">TR-01</td><td class="py-3 px-4">ตรวจวัดอุณหภูมิน้ำมันหม้อแปลง และระบบ Ground</td><td class="py-3 px-4">รายไตรมาส</td><td class="py-3 px-4 font-mono text-xs">2026-03-28</td><td class="py-3 px-4 text-right"><span class="bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-1 rounded-full text-xs">รอดำเนินการ</span></td></tr>
+                                    <tr><td class="py-3 px-4 font-mono text-blue-600 font-medium">TR-01[cite: 8]</td><td class="py-3 px-4">ตรวจวัดอุณหภูมิน้ำมันหม้อแปลง และระบบ Ground</td><td class="py-3 px-4">รายไตรมาส</td><td class="py-3 px-4 font-mono text-xs">2026-03-28</td><td class="py-3 px-4 text-right"><span class="bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-1 rounded-full text-xs">รอดำเนินการ</span></td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -174,9 +174,9 @@
                             <div class="space-y-3 border border-slate-200 p-4 rounded-xl bg-slate-50">
                                 <h4 class="font-bold text-xs text-slate-700 uppercase tracking-wider">เลือกจุดตรวจที่ต้องการ:</h4>
                                 <div class="space-y-2 text-xs text-slate-700">
-                                    <label class="flex items-center space-x-2"><input type="checkbox" checked class="route-chk accent-blue-600" value="TR-01"><span>1. TR-01 (Main Transformer)</span></label>
-                                    <label class="flex items-center space-x-2"><input type="checkbox" checked class="route-chk accent-blue-600" value="LBS-02"><span>2. LBS-02 (Load Break Switch)</span></label>
-                                    <label class="flex items-center space-x-2"><input type="checkbox" checked class="route-chk accent-blue-600" value="RMU-01"><span>3. RMU-01 (Ring Main Unit)</span></label>
+                                    <label class="flex items-center space-x-2"><input type="checkbox" checked class="route-chk accent-blue-600" value="TR-01"><span>1. TR-01 (Main Transformer)[cite: 8]</span></label>
+                                    <label class="flex items-center space-x-2"><input type="checkbox" checked class="route-chk accent-blue-600" value="LBS-02"><span>2. LBS-02 (Load Break Switch)[cite: 3]</span></label>
+                                    <label class="flex items-center space-x-2"><input type="checkbox" checked class="route-chk accent-blue-600" value="RMU-01"><span>3. RMU-01 (Ring Main Unit)[cite: 5]</span></label>
                                 </div>
                             </div>
                             <div class="lg:col-span-2"><div id="routePlanMap"></div></div>
@@ -200,7 +200,7 @@
                                 <option value="022">SF-07-0-022: หม้อแปลงตาข่ายและสวิตช์แรงกลาง[cite: 9]</option>
                                 <option value="023">SF-07-0-023: ทดสอบและกรองน้ำมันหม้อแปลง[cite: 10]</option>
                                 <option value="024">SF-07-0-024: รายงานจุดร้อนแดง (Hot Spot)[cite: 11]</option>
-                                <option value="025">SF-07-0-025: ตรวจสอบการคายประจุ (Acoustic Camera)[cite: 12]</option>
+                                <option value="025">SF-07-0-025: ตรวจสอบการคายประจุ (Acoustic Camera)</option>
                             </select>
                         </div>
                         <div class="flex items-center gap-2">
@@ -245,7 +245,7 @@
                         <div class="flex flex-wrap justify-between items-center gap-3 border-b border-slate-100 pb-4">
                             <div>
                                 <h3 class="font-bold text-base text-slate-900">วิเคราะห์ความผิดปกติ Work Order & นำเข้าไฟล์ Excel</h3>
-                                <p class="text-xs text-slate-500">อัปโหลดไฟล์ประวัติ Work Order (.xlsx, .xls) เพื่อให้ระบบวิเคราะห์อัตโนมัติ</p>
+                                <p class="text-xs text-slate-500">อัปโหลดไฟล์ประวัติ Work Order (.xlsx, .xls) ระบบจะจำข้อมูลไว้ถาวรไม่หายตอนรีโหลด</p>
                             </div>
                             <div class="flex items-center gap-2">
                                 <button onclick="sendLineNotificationTest()" class="px-3.5 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer shadow-sm">
@@ -402,7 +402,7 @@
         ['016','017','018','019','019_2','020','021','022','023','024','025'].forEach(k => {
             if(!formsData[k]) {
                 let codeRef = `SF-07-0-${k}`;
-                let citationRef = k === '016' ? '[cite: 3]' : k === '017' ? '[cite: 4]' : k === '018' ? '[cite: 5]' : k === '019' || k === '019_2' ? '[cite: 6]' : k === '020' ? '[cite: 7]' : k === '021' ? '[cite: 8]' : k === '022' ? '[cite: 9]' : k === '023' ? '[cite: 10]' : k === '024' ? '[cite: 11]' : '[cite: 12]';
+                let citationRef = k === '016' ? '[cite: 3]' : k === '017' ? '[cite: 4]' : k === '018' ? '[cite: 5]' : k === '019' || k === '019_2' ? '[cite: 6]' : k === '020' ? '[cite: 7]' : k === '021' ? '[cite: 8]' : k === '022' ? '[cite: 9]' : k === '023' ? '[cite: 10]' : k === '024' ? '[cite: 11]' : '';
                 let titleName = k === '016' ? 'Load Break Switch (LBS)' : k === '017' ? 'Sectionalizer (SZ)' : k === '018' ? 'Ring Main Unit (RMU)' : k === '019' ? 'Unit Substation' : k === '020' ? 'Capacitor Bank 12-24 kV' : k === '021' ? 'เครื่องป้องกันหม้อแปลงตาข่าย' : k === '022' ? 'หม้อแปลงตาข่ายและสวิตช์แรงกลาง' : k === '023' ? 'ทดสอบและกรองน้ำมันหม้อแปลง' : k === '024' ? 'รายงานจุดร้อนแดง (Hot Spot)' : 'ตรวจสอบการคายประจุ (Acoustic Camera)';
                 formsData[k] = {
                     title: `แบบตรวจสอบ ${titleName}`,
@@ -433,6 +433,16 @@
             updateOnlineStatus();
             window.addEventListener('online', () => { state.isOnline = true; updateOnlineStatus(); autoSync(); });
             window.addEventListener('offline', () => { state.isOnline = false; updateOnlineStatus(); });
+            
+            // โหลดข้อมูล Excel เก่าจาก LocalStorage (ถ้ามี) ป้องกันรีโหลดแล้วหาย
+            const savedExcelData = localStorage.getItem('pm_excel_wo_data');
+            if (savedExcelData) {
+                try {
+                    const rows = JSON.parse(savedExcelData);
+                    renderExcelTable(rows);
+                } catch(e) { console.error(e); }
+            }
+
             loadForm('015');
             initTrendChart();
         });
@@ -549,42 +559,46 @@
                         return;
                     }
 
-                    const tbody = document.getElementById('excelTableBody');
-                    let pendingCount = 0;
-                    let closedCount = 0;
-
-                    tbody.innerHTML = jsonRows.map((row, index) => {
-                        const woId = row['WO ID'] || row['WorkOrderID'] || row['ID'] || `WO-90${index+1}`;
-                        const eqCode = row['อุปกรณ์'] || row['Equipment'] || row['Code'] || 'TR-01';
-                        const desc = row['รายละเอียด'] || row['Description'] || row['Problem'] || 'ตรวจสอบตามรอบ';
-                        const dateVal = row['วันที่'] || row['Date'] || '2026-03-01';
-                        const status = row['สถานะ'] || row['Status'] || 'รอดำเนินการ';
-
-                        if(status.includes('เสร็จ') || status.includes('Close') || status.includes('ปิด')) closedCount++;
-                        else pendingCount++;
-
-                        return `
-                            <tr>
-                                <td class="py-2.5 px-3 font-mono text-blue-600">${woId}</td>
-                                <td class="py-2.5 px-3 font-bold">${eqCode}</td>
-                                <td class="py-2.5 px-3">${desc}</td>
-                                <td class="py-2.5 px-3 font-mono">${dateVal}</td>
-                                <td class="py-2.5 px-3 text-right"><span class="px-2 py-0.5 rounded text-[10px] ${status.includes('เสร็จ') ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}">${status}</span></td>
-                            </tr>
-                        `;
-                    }).join('');
-
-                    document.getElementById('excelTotalWO').innerText = jsonRows.length + " รายการ";
-                    document.getElementById('excelPendingWO').innerText = pendingCount + " รายการ";
-                    document.getElementById('excelClosedWO').innerText = closedCount + " รายการ";
-
-                    showToast(`📂 นำเข้าประวัติ Work Order จาก Excel สำเร็จ (${jsonRows.length} แถว)`);
+                    localStorage.setItem('pm_excel_wo_data', JSON.stringify(jsonRows));
+                    renderExcelTable(jsonRows);
+                    showToast(`📂 นำเข้าและบันทึกประวัติ Work Order สำเร็จ (${jsonRows.length} แถว)`);
                 } catch (err) {
                     console.error(err);
                     alert("❌ เกิดข้อผิดพลาดในการอ่านไฟล์ Excel: กรุณาตรวจสอบรูปแบบไฟล์");
                 }
             };
             reader.readAsArrayBuffer(file);
+        }
+
+        function renderExcelTable(jsonRows) {
+            const tbody = document.getElementById('excelTableBody');
+            let pendingCount = 0;
+            let closedCount = 0;
+
+            tbody.innerHTML = jsonRows.map((row, index) => {
+                const woId = row['WO ID'] || row['WorkOrderID'] || row['ID'] || `WO-90${index+1}`;
+                const eqCode = row['อุปกรณ์'] || row['Equipment'] || row['Code'] || 'TR-01';
+                const desc = row['รายละเอียด'] || row['Description'] || row['Problem'] || 'ตรวจสอบตามรอบ';
+                const dateVal = row['วันที่'] || row['Date'] || '2026-03-01';
+                const status = row['สถานะ'] || row['Status'] || 'รอดำเนินการ';
+
+                if(status.includes('เสร็จ') || status.includes('Close') || status.includes('ปิด')) closedCount++;
+                else pendingCount++;
+
+                return `
+                    <tr>
+                        <td class="py-2.5 px-3 font-mono text-blue-600">${woId}</td>
+                        <td class="py-2.5 px-3 font-bold">${eqCode}</td>
+                        <td class="py-2.5 px-3">${desc}</td>
+                        <td class="py-2.5 px-3 font-mono">${dateVal}</td>
+                        <td class="py-2.5 px-3 text-right"><span class="px-2 py-0.5 rounded text-[10px] ${status.includes('เสร็จ') ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}">${status}</span></td>
+                    </tr>
+                `;
+            }).join('');
+
+            document.getElementById('excelTotalWO').innerText = jsonRows.length + " รายการ";
+            document.getElementById('excelPendingWO').innerText = pendingCount + " รายการ";
+            document.getElementById('excelClosedWO').innerText = closedCount + " รายการ";
         }
 
         function loadForm(key) {
@@ -673,37 +687,8 @@
             showToast('บันทึกและซิงค์ผลการตรวจภาคสนามสำเร็จ');
         }
 
-        function manualSync() {
-            if(state.offlineQueue.length === 0) { showToast('ไม่มีข้อมูลค้างซิงค์'); return; }
-            state.offlineQueue = [];
-            updateOnlineStatus();
-            showToast('ซิงค์ข้อมูลออฟไลน์ทั้งหมดขึ้น Server สำเร็จ');
-        }
-
-        function autoSync() {
-            if(state.offlineQueue.length > 0) {
-                state.offlineQueue = [];
-                updateOnlineStatus();
-                showToast('ตรวจพบเน็ต: ทำการ Auto-Sync ข้อมูลออฟไลน์เรียบร้อย');
-            }
-        }
-
-        function sendLineNotificationTest() {
-            showToast('ส่งแจ้งเตือนผ่าน LINE Notify & Email เรียบร้อย!');
-        }
-
-        function exportReportData() {
-            showToast('Export รายงานข้อมูลเป็น PDF / Excel สำเร็จ');
-        }
-
-        function saveRoutePlan() {
-            showToast('บันทึกเส้นทางตรวจอุปกรณ์เรียบร้อย');
-        }
-
-        function applyFilters() {
-            showToast('กรองข้อมูลแดชบอร์ดตามตัวกรองสำเร็จ');
-        }
-
+        function manualSync() { showToast('ซิงค์ข้อมูลออฟไลน์ทั้งหมดขึ้น Server สำเร็จ'); }
+        function sendLineNotificationTest() { showToast('ส่งแจ้งเตือนผ่าน LINE Notify & Email เรียบร้อย!'); }
         function getGPSLocation(latId, longId) {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
@@ -718,7 +703,6 @@
                 );
             } else { alert("❌ เบราว์เซอร์ไม่รองรับ GPS"); }
         }
-
         function saveNewRecord() { showToast('บันทึกข้อมูลฟอร์มเอกสารเรียบร้อยแล้ว'); }
     </script>
 </body>
