@@ -20,11 +20,13 @@
             width: 210mm; min-height: 297mm; padding: 12mm 15mm; margin: 0 auto; background: white;
             box-shadow: 0 10px 25px -5px rgba(30, 41, 59, 0.08); border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box;
         }
-        #fieldRouteMap, #routePlanMap { width: 100%; height: 350px; border-radius: 1rem; z-index: 5; }
+        #realMap, #routePlanMap, #fieldRouteMap { width: 100%; height: 350px; border-radius: 1rem; z-index: 5; }
         table { border-collapse: collapse; width: 100%; }
         th, td { border: 1px solid #000000; padding: 3px 5px; font-size: 10px; color: #000000; }
         th { background-color: #f1f5f9; font-weight: 600; text-align: center; }
         input[type="text"], input[type="date"], select { border: none; outline: none; background: transparent; width: 100%; font-family: 'Sarabun', sans-serif; font-size: 10px; color: #000000; }
+        .form-header-bg { background-color: #d1d5db; font-weight: bold; color: #000; }
+        .sub-header-bg { background-color: #f3f4f6; font-weight: bold; color: #000; }
         @media print {
             body { background: white !important; }
             aside, header, .no-print { display: none !important; }
@@ -34,12 +36,12 @@
 </head>
 <body class="h-full flex flex-col text-slate-800 antialiased overflow-hidden">
 
-    <!-- Toast & Offline Queue Status Bar -->
+    <!-- Toast & Offline Status Bar -->
     <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
-    <div id="offline-banner" class="bg-amber-500 text-slate-950 px-4 py-2 text-xs font-semibold text-center hidden no-print flex items-center justify-center space-x-3 shadow-md">
+    <div id="offline-banner" class="bg-amber-500 text-slate-950 px-4 py-1.5 text-xs font-semibold text-center hidden no-print flex items-center justify-center space-x-3 shadow-md">
         <i data-lucide="wifi-off" class="w-4 h-4"></i>
-        <span>โหมด Offline: บันทึกข้อมูลลงเครื่องแล้ว (<span id="queueCount">0</span> รายการรอซิงค์)</span>
-        <button onclick="syncOfflineData()" class="bg-amber-700 text-white px-2.5 py-1 rounded text-xs cursor-pointer shadow-xs">ซิงค์ข้อมูลทันที</button>
+        <span>โหมด Offline: ข้อมูลถูกเก็บไว้ในเครื่องและจะ Sync อัตโนมัติเมื่อมีอินเทอร์เน็ต (<span id="offline-count">0</span> รายการ)</span>
+        <button onclick="manualSync()" class="underline ml-2 bg-amber-700 text-white px-2.5 py-1 rounded text-xs cursor-pointer">ซิงค์ทันที</button>
     </div>
 
     <div class="flex h-full w-full overflow-hidden">
@@ -72,13 +74,13 @@
                     <i data-lucide="file-text" class="w-5 h-5 text-cyan-400"></i><span>ฟอร์มเอกสาร (11 แบบ กฟน.)</span>
                 </button>
                 <button onclick="switchTab('field-route')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="field-route">
-                    <i data-lucide="navigation" class="w-5 h-5 text-emerald-400"></i><span>นำเส้นทางตรวจ PM ภาคสนาม</span>
+                    <i data-lucide="navigation" class="w-5 h-5 text-emerald-400"></i><span>นำเส้นทางตรวจ & บันทึกภาคสนาม</span>
                 </button>
                 <button onclick="switchTab('wo-analytics')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="wo-analytics">
                     <i data-lucide="bar-chart-3" class="w-5 h-5 text-rose-400"></i><span>วิเคราะห์ความผิดปกติ Work Order</span>
                 </button>
                 <button onclick="switchTab('admin-settings')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="admin-settings">
-                    <i data-lucide="settings" class="w-5 h-5 text-slate-400"></i><span>จัดการตั้งค่าระบบ & อุปกรณ์</span>
+                    <i data-lucide="settings" class="w-5 h-5 text-slate-400"></i><span>จัดการสิทธิ์ & Audit Log</span>
                 </button>
             </nav>
         </aside>
@@ -119,10 +121,10 @@
                         </button>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-white p-5 rounded-2xl border shadow-sm flex items-center justify-between"><div><p class="text-xs font-semibold text-slate-500 uppercase">จุดตรวจทั้งหมด</p><h3 id="stat-total" class="text-3xl font-bold text-slate-900 mt-1">12</h3></div><div class="p-3.5 bg-blue-50 text-blue-600 rounded-xl"><i data-lucide="cpu" class="w-6 h-6"></i></div></div>
-                        <div class="bg-white p-5 rounded-2xl border shadow-sm flex items-center justify-between"><div><p class="text-xs font-semibold text-slate-500 uppercase">ผ่านการตรวจสอบ</p><h3 id="stat-pass" class="text-3xl font-bold text-emerald-600 mt-1">9</h3></div><div class="p-3.5 bg-emerald-50 text-emerald-600 rounded-xl"><i data-lucide="check-circle-2" class="w-6 h-6"></i></div></div>
-                        <div class="bg-white p-5 rounded-2xl border shadow-sm flex items-center justify-between"><div><p class="text-xs font-semibold text-slate-500 uppercase">พบปัญหา / เฝ้าระวัง</p><h3 id="stat-warning" class="text-3xl font-bold text-amber-600 mt-1">2</h3></div><div class="p-3.5 bg-amber-50 text-amber-600 rounded-xl"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div></div>
-                        <div class="bg-white p-5 rounded-2xl border shadow-sm flex items-center justify-between"><div><p class="text-xs font-semibold text-slate-500 uppercase">ต้องซ่อมด่วน (Critical)</p><h3 id="stat-critical" class="text-3xl font-bold text-rose-600 mt-1">1</h3></div><div class="p-3.5 bg-rose-50 text-rose-600 rounded-xl"><i data-lucide="shield-alert" class="w-6 h-6"></i></div></div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between"><div><p class="text-xs font-semibold text-slate-500 uppercase">จุดตรวจทั้งหมด</p><h3 id="stat-total" class="text-3xl font-bold text-slate-900 mt-1">12</h3></div><div class="p-3.5 bg-blue-50 text-blue-600 rounded-xl"><i data-lucide="cpu" class="w-6 h-6"></i></div></div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between"><div><p class="text-xs font-semibold text-slate-500 uppercase">ผ่านการตรวจสอบ</p><h3 id="stat-pass" class="text-3xl font-bold text-emerald-600 mt-1">9</h3></div><div class="p-3.5 bg-emerald-50 text-emerald-600 rounded-xl"><i data-lucide="check-circle-2" class="w-6 h-6"></i></div></div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between"><div><p class="text-xs font-semibold text-slate-500 uppercase">พบปัญหา / เฝ้าระวัง</p><h3 id="stat-warning" class="text-3xl font-bold text-amber-600 mt-1">2</h3></div><div class="p-3.5 bg-amber-50 text-amber-600 rounded-xl"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div></div>
+                        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between"><div><p class="text-xs font-semibold text-slate-500 uppercase">ต้องซ่อมด่วน (Critical)</p><h3 id="stat-critical" class="text-3xl font-bold text-rose-600 mt-1">1</h3></div><div class="p-3.5 bg-rose-50 text-rose-600 rounded-xl"><i data-lucide="shield-alert" class="w-6 h-6"></i></div></div>
                     </div>
                     <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
                         <h3 class="font-bold text-base text-slate-900">กราฟแนวโน้มอุณหภูมิและความผิดปกติย้อนหลัง (Predictive Maintenance Trend)</h3>
@@ -132,10 +134,10 @@
 
                 <!-- TAB 2: ตารางวางแผน PM อุปกรณ์ไฟฟ้า -->
                 <section id="tab-pm-schedule" class="tab-content hidden space-y-6">
-                    <div class="bg-white rounded-2xl border shadow-sm overflow-hidden p-5 space-y-4">
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-5 space-y-4">
                         <div class="flex justify-between items-center">
                             <h3 class="font-bold text-base text-slate-800">ตารางวางแผนการบำรุงรักษาเชิงป้องกัน (PM Schedule)</h3>
-                            <button onclick="openScheduleModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-xl text-xs font-semibold flex items-center space-x-2 cursor-pointer shadow">
+                            <button onclick="openScheduleModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
                                 <i data-lucide="plus" class="w-4 h-4"></i><span>สร้างแผน PM</span>
                             </button>
                         </div>
@@ -150,7 +152,7 @@
                     </div>
                 </section>
 
-                <!-- TAB 3: หน้าวางแผนเส้นทางตรวจอุปกรณ์ -->
+                <!-- TAB 3: วางแผนเส้นทางตรวจอุปกรณ์ -->
                 <section id="tab-route-plan" class="tab-content hidden space-y-6">
                     <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
                         <div class="flex justify-between items-center">
@@ -174,32 +176,36 @@
                     </div>
                 </section>
 
-                <!-- TAB 4: ฟอร์มเอกสารการบำรุงรักษาอุปกรณ์ไฟฟ้า (A4 - 11 แบบ กฟน.) -->
+                <!-- TAB 4: ฟอร์มเอกสารการบำรุงรักษาอุปกรณ์ไฟฟ้า (ครบถ้วน 11 ใบงานต้นฉบับ กฟน.) -->
                 <section id="tab-electrical-form" class="tab-content hidden space-y-6">
                     <div class="max-w-[210mm] mx-auto bg-white p-4 rounded-2xl border border-slate-300 shadow-xs flex flex-wrap items-center justify-between gap-3 no-print">
-                        <select id="formSelector" onchange="loadForm(this.value)" class="px-3 py-2 border rounded-lg text-xs font-semibold bg-slate-50">
-                            <option value="015">SF-07-0-015: หม้อแปลงจำหน่าย[cite: 2]</option>
-                            <option value="016">SF-07-0-016: Load Break Switch (LBS)[cite: 3]</option>
-                            <option value="017">SF-07-0-017: Sectionalizer (SZ)[cite: 4]</option>
-                            <option value="018">SF-07-0-018: Ring Main Unit (RMU)[cite: 5]</option>
-                            <option value="019">SF-07-0-019: Unit Substation (หน้า 1)[cite: 6]</option>
-                            <option value="019_2">SF-07-0-019: Unit Substation (หน้า 2)[cite: 6]</option>
-                            <option value="020">SF-07-0-020: Capacitor Bank 12-24 kV[cite: 7]</option>
-                            <option value="021">SF-07-0-021: เครื่องป้องกันหม้อแปลงตาข่าย[cite: 8]</option>
-                            <option value="022">SF-07-0-022: หม้อแปลงตาข่ายและสวิตช์แรงกลาง[cite: 9]</option>
-                            <option value="023">SF-07-0-023: ทดสอบและกรองน้ำมันหม้อแปลง[cite: 10]</option>
-                            <option value="024">SF-07-0-024: รายงานจุดร้อนแดง (Hot Spot)[cite: 11]</option>
-                            <option value="025">SF-07-0-025: ตรวจสอบการคายประจุ (Acoustic Camera)[cite: 12]</option>
-                        </select>
-                        <div class="flex space-x-2">
-                            <button onclick="saveNewRecord()" class="px-3.5 py-2 bg-sky-600 text-white rounded-xl text-xs font-semibold cursor-pointer">💾 บันทึกฟอร์ม</button>
-                            <button onclick="window.print()" class="px-3.5 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold cursor-pointer">🖨️ พิมพ์ A4</button>
+                        <div class="flex items-center gap-2">
+                            <select id="formSelector" onchange="loadForm(this.value)" class="px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold bg-slate-50 text-slate-800">
+                                <option value="015">SF-07-0-015: หม้อแปลงจำหน่าย[cite: 2]</option>
+                                <option value="016">SF-07-0-016: Load Break Switch (LBS)[cite: 3]</option>
+                                <option value="017">SF-07-0-017: Sectionalizer (SZ)[cite: 4]</option>
+                                <option value="018">SF-07-0-018: Ring Main Unit (RMU)[cite: 5]</option>
+                                <option value="019">SF-07-0-019: Unit Substation (หน้า 1)[cite: 6]</option>
+                                <option value="019_2">SF-07-0-019: Unit Substation (หน้า 2)[cite: 6]</option>
+                                <option value="020">SF-07-0-020: Capacitor Bank 12-24 kV[cite: 7]</option>
+                                <option value="021">SF-07-0-021: เครื่องป้องกันหม้อแปลงตาข่าย[cite: 8]</option>
+                                <option value="022">SF-07-0-022: หม้อแปลงตาข่ายและสวิตช์แรงกลาง[cite: 9]</option>
+                                <option value="023">SF-07-0-023: ทดสอบและกรองน้ำมันหม้อแปลง[cite: 10]</option>
+                                <option value="024">SF-07-0-024: รายงานจุดร้อนแดง (Hot Spot)[cite: 11]</option>
+                                <option value="025">SF-07-0-025: ตรวจสอบการคายประจุ (Acoustic Camera)[cite: 12]</option>
+                            </select>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="saveNewRecord()" class="px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-medium cursor-pointer shadow-xs">💾 บันทึกใหม่</button>
+                            <button onclick="window.print()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-medium cursor-pointer shadow-xs">🖨️ พิมพ์/PDF</button>
                         </div>
                     </div>
-                    <div class="sarabun-font flex justify-center pb-12"><div id="a4Paper" class="a4-sheet text-slate-900 bg-white"></div></div>
+                    <div class="sarabun-font flex justify-center pb-12">
+                        <div id="a4Paper" class="a4-sheet text-slate-900 bg-white"></div>
+                    </div>
                 </section>
 
-                <!-- TAB 5: หน้า นำเส้นทางตรวจ PM ภาคสนาม (Step-by-step Check-in) -->
+                <!-- TAB 5: นำเส้นทางตรวจ PM ภาคสนาม (Step-by-step Check-in) -->
                 <section id="tab-field-route" class="tab-content hidden space-y-6">
                     <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
                         <div class="flex justify-between items-center">
@@ -243,24 +249,17 @@
                     </div>
                 </section>
 
-                <!-- TAB 7: ตั้งค่าระบบ (Settings) & Audit Log -->
+                <!-- TAB 7: ตั้งค่าระบบ & Audit Log -->
                 <section id="tab-admin-settings" class="tab-content hidden space-y-6">
                     <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-                        <h3 class="font-bold text-base text-slate-900">ตั้งค่าระบบ จัดการอุปกรณ์ และ Audit Log</h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div class="p-4 border rounded-xl space-y-3 bg-slate-50">
-                                <h4 class="font-bold text-xs text-slate-700">จัดการรายชื่ออุปกรณ์ / จุดตรวจ</h4>
-                                <input type="text" placeholder="รหัสอุปกรณ์ใหม่ (เช่น TR-03)" class="w-full px-3 py-1.5 border rounded-lg bg-white text-xs">
-                                <button onclick="showToast('เพิ่มอุปกรณ์ใหม่สำเร็จ')" class="w-full py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold cursor-pointer">บันทึกอุปกรณ์</button>
-                            </div>
-                            <div class="p-4 border rounded-xl space-y-3 bg-slate-50">
-                                <h4 class="font-bold text-xs text-slate-700">Audit Log (ประวัติการแก้ไขระบบ)</h4>
-                                <div class="text-[11px] space-y-1 text-slate-600 max-h-32 overflow-y-auto">
-                                    <div>[14/09/2026 10:15] Supervisor อนุมัติแผน PM TR-01</div>
-                                    <div>[14/09/2026 09:30] Field Tech บันทึกผลตรวจ LBS-02</div>
-                                </div>
-                            </div>
-                        </div>
+                        <h3 class="font-bold text-base text-slate-900">ประวัติการแก้ไขข้อมูลระบบ (Audit Log)</h3>
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead><tr class="bg-slate-50 border-b uppercase text-slate-500"><th class="py-2.5 px-3">ผู้ใช้งาน</th><th class="py-2.5 px-3">การกระทำ</th><th class="py-2.5 px-3">เวลา</th></tr></thead>
+                            <tbody class="divide-y">
+                                <tr><td class="py-2.5 px-3">Supervisor (หัวหน้างาน)</td><td class="py-2.5 px-3">อนุมัติแผน PM อุปกรณ์ TR-01</td><td class="py-2.5 px-3 font-mono">14/09/2026 10:15</td></tr>
+                                <tr><td class="py-2.5 px-3">Field Tech (ช่างภาคสนาม)</td><td class="py-2.5 px-3">บันทึกผลตรวจ LBS-02 (พบปัญหา)</td><td class="py-2.5 px-3 font-mono">14/09/2026 09:30</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </section>
             </div>
@@ -284,29 +283,29 @@
                 <div><label class="block text-xs font-semibold">กำหนดการ:</label><input type="date" id="sch-date" required class="w-full px-3.5 py-1.5 border rounded-xl"></div>
                 <div class="pt-2 flex justify-end space-x-2">
                     <button type="button" onclick="closeScheduleModal()" class="px-4 py-2 border rounded-xl text-xs cursor-pointer">ยกเลิก</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold cursor-pointer">บันทึกแผนงาน</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold cursor-pointer">บันทึกแผนงาน</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL: FIELD INSPECTION & CHECKLIST WITH IMAGE ANNOTATION & DETAILED CHECKLIST -->
+    <!-- MODAL: FIELD INSPECTION & CHECKLIST WITH IMAGE ANNOTATION -->
     <div id="field-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
         <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-6 space-y-4">
-            <h3 class="font-bold text-lg text-slate-900">บันทึกผลตรวจสอบภาคสนาม (Field Inspection)</h3>
+            <h3 class="font-bold text-lg text-slate-900">บันทึกผลตรวจสอบ & แนบรูปถ่ายหน้างาน</h3>
             <div class="space-y-3 text-sm">
                 <div><label class="block text-xs font-semibold text-slate-600">รหัสอุปกรณ์:</label><input type="text" id="m-eq" readonly class="w-full px-3.5 py-2 border rounded-xl bg-slate-100 font-mono"></div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-xs font-semibold text-slate-600">พิกัด GPS อัตโนมัติ:</label><input type="text" id="m-gps" readonly class="w-full px-3 py-1.5 border rounded-xl bg-slate-100 font-mono text-xs"></div>
-                    <div><label class="block text-xs font-semibold text-slate-600">Timestamp อัตโนมัติ:</label><input type="text" id="m-time" readonly class="w-full px-3 py-1.5 border rounded-xl bg-slate-100 font-mono text-xs"></div>
+                    <div><label class="block text-xs font-semibold text-slate-600">พิกัด GPS อัตโนมัติ:</label><input type="text" id="m-gps" readonly class="w-full px-3.5 py-2 border rounded-xl bg-slate-100 font-mono text-xs"></div>
+                    <div><label class="block text-xs font-semibold text-slate-600">Timestamp อัตโนมัติ:</label><input type="text" id="m-time" readonly class="w-full px-3.5 py-2 border rounded-xl bg-slate-100 font-mono text-xs"></div>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Checklist มาตรฐานครบถ้วน:</label>
                     <div class="space-y-2 bg-slate-50 p-3 rounded-xl border text-xs max-h-40 overflow-y-auto">
-                        <div class="flex justify-between items-center py-1 border-b"><span>1. ค่าฉนวน (Insulation Resistance)</span><select class="border rounded p-1"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
-                        <div class="flex justify-between items-center py-1 border-b"><span>2. กระแสไฟฟ้า (Current) & แรงดันไฟ (Voltage)</span><select class="border rounded p-1"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
-                        <div class="flex justify-between items-center py-1 border-b"><span>3. สภาพ Breaker / Fuse</span><select class="border rounded p-1"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
-                        <div class="flex justify-between items-center py-1"><span>4. ป้าย Safety Label & Grounding</span><select class="border rounded p-1"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
+                        <div class="flex justify-between items-center py-1 border-b"><span>1. ค่าฉนวน (Insulation Resistance)[cite: 8, 9]</span><select class="border rounded p-1"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
+                        <div class="flex justify-between items-center py-1 border-b"><span>2. กระแสไฟฟ้า & แรงดันไฟ[cite: 2, 6]</span><select class="border rounded p-1"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
+                        <div class="flex justify-between items-center py-1 border-b"><span>3. สภาพ Breaker / Fuse[cite: 3, 6, 7]</span><select class="border rounded p-1"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
+                        <div class="flex justify-between items-center py-1"><span>4. ป้าย Safety Label & Grounding[cite: 2, 8]</span><select class="border rounded p-1"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
                     </div>
                 </div>
                 <div>
@@ -454,8 +453,8 @@
             if(routePlanMap) routePlanMap.remove();
             routePlanMap = L.map('routePlanMap').setView([13.7563, 100.5018], 14);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(routePlanMap);
-            L.marker([13.7573, 100.5028]).addTo(routePlanMap).bindPopup('จุดที่ 1: TR-01');
-            L.marker([13.7540, 100.5005]).addTo(routePlanMap).bindPopup('จุดที่ 2: LBS-02');
+            L.marker([13.7573, 100.5028]).addTo(routePlanMap).bindPopup('จุดที่ 1: TR-01[cite: 8]');
+            L.marker([13.7540, 100.5005]).addTo(routePlanMap).bindPopup('จุดที่ 2: LBS-02[cite: 3]');
         }
 
         function initFieldRouteMap() {
@@ -464,7 +463,7 @@
             if(leafletMap) leafletMap.remove();
             leafletMap = L.map('fieldRouteMap').setView([13.7563, 100.5018], 15);
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(leafletMap);
-            L.marker([13.7573, 100.5028]).addTo(leafletMap).bindPopup('จุดตรวจถัดไป: TR-01');
+            L.marker([13.7573, 100.5028]).addTo(leafletMap).bindPopup('จุดตรวจถัดไป: TR-01[cite: 8]');
         }
 
         function toggleSidebar() { document.getElementById('sidebar').classList.toggle('-translate-x-full'); }
@@ -498,7 +497,7 @@
                 data: {
                     labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.'],
                     datasets: [{
-                        label: 'อุณหภูมิจุดต่อสาย TR-01 (°C)',
+                        label: 'อุณหภูมิจุดต่อสาย TR-01 (°C)[cite: 8, 11]',
                         data: [58, 60, 62, 65, 74, 82],
                         borderColor: '#f43f5e',
                         backgroundColor: 'rgba(244, 63, 94, 0.1)',
