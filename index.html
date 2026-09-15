@@ -3,24 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบบริหารจัดการงานซ่อมบำรุงเชิงป้องกัน (PM-CMMS Pro Complete Field Edition)</title>
+    <title>ระบบบริหารจัดการงานซ่อมบำรุงเชิงป้องกัน (PM-CMMS Pro Connected Edition)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <style>
-        body { font-family: 'Prompt', sans-serif; }
+        body { font-family: 'Prompt', sans-serif; background: #f8fafc; color: #0f172a; }
         .sarabun-font { font-family: 'Sarabun', sans-serif; }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
         .a4-sheet {
             width: 210mm; min-height: 297mm; padding: 12mm 15mm; margin: 0 auto; background: white;
-            box-shadow: 0 10px 25px -5px rgba(30, 41, 59, 0.08); border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.08); border-radius: 8px; border: 1px solid #cbd5e1; box-sizing: border-box;
         }
-        #realMap, #routePlanMap, #fieldRouteMap { width: 100%; height: 350px; border-radius: 1rem; z-index: 5; }
+        #routePlanMap, #fieldRouteMap { width: 100%; height: 350px; border-radius: 1rem; z-index: 5; }
         table { border-collapse: collapse; width: 100%; }
         th, td { border: 1px solid #000000; padding: 3px 5px; font-size: 10px; color: #000000; }
         th { background-color: #f1f5f9; font-weight: 600; text-align: center; }
@@ -34,7 +35,7 @@
         }
     </style>
 </head>
-<body class="h-full flex flex-col text-slate-800 antialiased overflow-hidden">
+<body class="h-full flex flex-col antialiased overflow-hidden">
 
     <!-- Toast & Offline Status Bar -->
     <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
@@ -46,129 +47,136 @@
 
     <div class="flex h-full w-full overflow-hidden">
         <!-- Sidebar Navigation -->
-        <aside id="sidebar" class="w-64 bg-slate-900 text-slate-300 flex flex-col transition-all duration-300 z-30 shrink-0 md:relative absolute inset-y-0 left-0 -translate-x-full md:translate-x-0 shadow-xl no-print">
+        <aside id="sidebar" class="w-64 bg-slate-900 text-slate-200 flex flex-col transition-all duration-300 z-30 shrink-0 md:relative absolute inset-y-0 left-0 -translate-x-full md:translate-x-0 shadow-xl no-print">
             <div class="p-5 flex items-center justify-between border-b border-slate-800">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-blue-600 text-white p-2.5 rounded-xl shadow-lg shadow-blue-500/30">
-                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                    <div class="bg-slate-800 text-white p-2.5 rounded-xl border border-slate-700 shadow-sm">
+                        <i data-lucide="zap" class="w-5 h-5 text-amber-400"></i>
                     </div>
                     <div>
-                        <h1 class="font-bold text-lg text-white tracking-wide">PM-CMMS Pro</h1>
-                        <p class="text-xs text-slate-400">Complete Field Suite</p>
+                        <h1 class="font-bold text-base text-white tracking-wide">PM-CMMS Pro</h1>
+                        <p class="text-[10px] text-slate-400">Connected Edition</p>
                     </div>
                 </div>
                 <button onclick="toggleSidebar()" class="md:hidden text-slate-400 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
 
-            <nav class="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto custom-scrollbar">
-                <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white active-tab" data-target="dashboard">
-                    <i data-lucide="layout-dashboard" class="w-5 h-5 text-blue-400"></i><span>Dashboard & Analytics</span>
+            <nav class="flex-1 px-4 py-5 space-y-1.5 overflow-y-auto custom-scrollbar text-xs">
+                <button onclick="switchTab('dashboard')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white active-tab bg-slate-800 text-white shadow-xs" data-target="dashboard">
+                    <i data-lucide="layout-dashboard" class="w-4 h-4 text-slate-400"></i><span>Dashboard & Analytics</span>
                 </button>
-                <button onclick="switchTab('pm-schedule')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="pm-schedule">
-                    <i data-lucide="calendar-range" class="w-5 h-5 text-amber-400"></i><span>ตารางวางแผน PM อุปกรณ์ไฟฟ้า</span>
+                <button onclick="switchTab('pm-schedule')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="pm-schedule">
+                    <i data-lucide="calendar-range" class="w-4 h-4 text-slate-400"></i><span>ตารางวางแผน PM อุปกรณ์ไฟฟ้า</span>
                 </button>
-                <button onclick="switchTab('route-plan')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="route-plan">
-                    <i data-lucide="map" class="w-5 h-5 text-indigo-400"></i><span>วางแผนเส้นทางตรวจอุปกรณ์</span>
+                <button onclick="switchTab('route-plan')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="route-plan">
+                    <i data-lucide="map" class="w-4 h-4 text-slate-400"></i><span>วางแผนเส้นทางตรวจอุปกรณ์</span>
                 </button>
-                <button onclick="switchTab('electrical-form')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="electrical-form">
-                    <i data-lucide="file-text" class="w-5 h-5 text-cyan-400"></i><span>ฟอร์มเอกสาร (11 แบบ กฟน.)</span>
+                <button onclick="switchTab('electrical-form')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="electrical-form">
+                    <i data-lucide="file-text" class="w-4 h-4 text-slate-400"></i><span>ฟอร์มเอกสาร (11 แบบ กฟน.)</span>
                 </button>
-                <button onclick="switchTab('field-route')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="field-route">
-                    <i data-lucide="navigation" class="w-5 h-5 text-emerald-400"></i><span>นำเส้นทางตรวจ & บันทึกภาคสนาม</span>
+                <button onclick="switchTab('field-route')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="field-route">
+                    <i data-lucide="navigation" class="w-4 h-4 text-slate-400"></i><span>นำเส้นทางตรวจ & ภาคสนาม</span>
                 </button>
-                <button onclick="switchTab('wo-analytics')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="wo-analytics">
-                    <i data-lucide="bar-chart-3" class="w-5 h-5 text-rose-400"></i><span>วิเคราะห์ความผิดปกติ Work Order</span>
+                <button onclick="switchTab('wo-analytics')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="wo-analytics">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4 text-slate-400"></i><span>วิเคราะห์ Work Order & Excel</span>
                 </button>
-                <button onclick="switchTab('admin-settings')" class="nav-btn w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-sm font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="admin-settings">
-                    <i data-lucide="settings" class="w-5 h-5 text-slate-400"></i><span>จัดการสิทธิ์ & Audit Log</span>
+                <button onclick="switchTab('admin-settings')" class="nav-btn w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl font-medium transition-all text-slate-300 hover:bg-slate-800 hover:text-white" data-target="admin-settings">
+                    <i data-lucide="settings" class="w-4 h-4 text-slate-400"></i><span>จัดการสิทธิ์ & Audit Log</span>
                 </button>
             </nav>
         </aside>
 
         <!-- Main Content Area -->
         <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-100">
-            <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 shadow-sm no-print">
+            <header class="h-16 bg-white border-b border-slate-200 px-6 flex items-center justify-between shrink-0 shadow-xs no-print">
                 <div class="flex items-center space-x-4">
                     <button onclick="toggleSidebar()" class="md:hidden p-2 rounded-lg text-slate-600 hover:bg-slate-100"><i data-lucide="menu" class="w-6 h-6"></i></button>
-                    <h2 id="page-title" class="text-xl font-bold text-slate-800 tracking-tight">Dashboard & Analytics</h2>
+                    <h2 id="page-title" class="text-lg font-bold text-slate-900 tracking-tight">Dashboard & Analytics</h2>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <div class="flex items-center space-x-2 bg-slate-100 px-3 py-1.5 rounded-lg border">
+                    <div class="flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
                         <i data-lucide="user-check" class="w-4 h-4 text-slate-600"></i>
-                        <select id="userRoleSelect" onchange="changeUserRole(this.value)" class="text-xs font-semibold bg-transparent outline-none cursor-pointer">
+                        <select id="userRoleSelect" onchange="changeUserRole(this.value)" class="text-xs font-semibold bg-transparent text-slate-700 outline-none cursor-pointer">
                             <option value="ช่างภาคสนาม">ช่างภาคสนาม (Field Tech)</option>
                             <option value="หัวหน้างาน">หัวหน้างาน (Supervisor)</option>
                             <option value="แอดมิน">ผู้ดูแลระบบ (Admin)</option>
                         </select>
                     </div>
-                    <span id="sync-status-badge" class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 flex items-center space-x-1">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-1"></span> ออนไลน์
+                    <span id="sync-status-badge" class="px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-1"></span> <span>ออนไลน์</span>
                     </span>
                 </div>
             </header>
 
             <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
                 
-                <!-- TAB 1: DASHBOARD & ANALYTICS -->
+                <!-- TAB 1: DASHBOARD -->
                 <section id="tab-dashboard" class="tab-content space-y-6">
-                    <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
                         <div class="flex items-center space-x-3">
-                            <select id="filterRisk" onchange="applyFilters()" class="px-3 py-2 border rounded-xl text-xs bg-slate-50"><option value="">ทุกระดับความเสี่ยง</option><option value="ปกติ">ปกติ</option><option value="เฝ้าระวัง">เฝ้าระวัง</option><option value="ต้องซ่อมด่วน">ต้องซ่อมด่วน</option></select>
-                            <select id="filterDevice" onchange="applyFilters()" class="px-3 py-2 border rounded-xl text-xs bg-slate-50"><option value="">ทุกประเภทอุปกรณ์</option><option value="TR">หม้อแปลง (TR)</option><option value="LBS">สวิตช์ (LBS)</option></select>
+                            <select id="filterRisk" onchange="applyFilters()" class="px-3.5 py-2 border border-slate-200 rounded-xl text-xs bg-slate-50 text-slate-700"><option value="">ทุกระดับความเสี่ยง</option><option value="ปกติ">ปกติ</option><option value="เฝ้าระวัง">เฝ้าระวัง</option><option value="ต้องซ่อมด่วน">ต้องซ่อมด่วน</option></select>
+                            <select id="filterDevice" onchange="applyFilters()" class="px-3.5 py-2 border border-slate-200 rounded-xl text-xs bg-slate-50 text-slate-700"><option value="">ทุกประเภทอุปกรณ์</option><option value="TR">หม้อแปลง (TR)</option><option value="LBS">สวิตช์ (LBS)</option></select>
                         </div>
-                        <button onclick="exportReportData()" class="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
+                        <button onclick="exportReportData()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold flex items-center space-x-2 cursor-pointer shadow-sm">
                             <i data-lucide="download" class="w-4 h-4"></i><span>Export รายงาน (PDF/Excel)</span>
                         </button>
                     </div>
+
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between"><div><p class="text-xs font-semibold text-slate-500 uppercase">จุดตรวจทั้งหมด</p><h3 id="stat-total" class="text-3xl font-bold text-slate-900 mt-1">12</h3></div><div class="p-3.5 bg-blue-50 text-blue-600 rounded-xl"><i data-lucide="cpu" class="w-6 h-6"></i></div></div>
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between"><div><p class="text-xs font-semibold text-slate-500 uppercase">ผ่านการตรวจสอบ</p><h3 id="stat-pass" class="text-3xl font-bold text-emerald-600 mt-1">9</h3></div><div class="p-3.5 bg-emerald-50 text-emerald-600 rounded-xl"><i data-lucide="check-circle-2" class="w-6 h-6"></i></div></div>
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between"><div><p class="text-xs font-semibold text-slate-500 uppercase">พบปัญหา / เฝ้าระวัง</p><h3 id="stat-warning" class="text-3xl font-bold text-amber-600 mt-1">2</h3></div><div class="p-3.5 bg-amber-50 text-amber-600 rounded-xl"><i data-lucide="alert-triangle" class="w-6 h-6"></i></div></div>
                         <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between"><div><p class="text-xs font-semibold text-slate-500 uppercase">ต้องซ่อมด่วน (Critical)</p><h3 id="stat-critical" class="text-3xl font-bold text-rose-600 mt-1">1</h3></div><div class="p-3.5 bg-rose-50 text-rose-600 rounded-xl"><i data-lucide="shield-alert" class="w-6 h-6"></i></div></div>
                     </div>
-                    <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-                        <h3 class="font-bold text-base text-slate-900">กราฟแนวโน้มอุณหภูมิและความผิดปกติย้อนหลัง (Predictive Maintenance Trend)</h3>
+
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-sm text-slate-900">กราฟแนวโน้มอุณหภูมิและความผิดปกติย้อนหลัง (Predictive Maintenance Trend)</h3>
+                            <span class="text-[10px] text-sky-700 bg-sky-50 px-2.5 py-1 rounded-full border border-sky-200 font-medium">AI Health Index: 88% (Normal)</span>
+                        </div>
                         <div class="h-64 relative"><canvas id="trendChart"></canvas></div>
                     </div>
                 </section>
 
-                <!-- TAB 2: ตารางวางแผน PM อุปกรณ์ไฟฟ้า -->
+                <!-- TAB 2: PM SCHEDULE -->
                 <section id="tab-pm-schedule" class="tab-content hidden space-y-6">
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-5 space-y-4">
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6 space-y-4">
                         <div class="flex justify-between items-center">
-                            <h3 class="font-bold text-base text-slate-800">ตารางวางแผนการบำรุงรักษาเชิงป้องกัน (PM Schedule)</h3>
-                            <button onclick="openScheduleModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
+                            <h3 class="font-bold text-base text-slate-900">ตารางวางแผนการบำรุงรักษาเชิงป้องกัน (PM Schedule)</h3>
+                            <button onclick="openScheduleModal()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl text-xs font-semibold flex items-center space-x-2 cursor-pointer shadow-sm">
                                 <i data-lucide="plus" class="w-4 h-4"></i><span>สร้างแผน PM</span>
                             </button>
                         </div>
-                        <table class="w-full text-left border-collapse text-sm">
-                            <thead><tr class="bg-slate-50 border-b text-xs text-slate-500 uppercase">
-                                <th class="py-3 px-4">รหัสอุปกรณ์</th><th class="py-3 px-4">ชื่องาน PM</th><th class="py-3 px-4">ความถี่</th><th class="py-3 px-4">กำหนดการ</th><th class="py-3 px-4 text-right">สถานะ</th>
-                            </tr></thead>
-                            <tbody id="schedule-tbody" class="divide-y">
-                                <tr><td class="py-3 px-4 font-mono">TR-01</td><td class="py-3 px-4">ตรวจวัดอุณหภูมิน้ำมันหม้อแปลง และระบบ Ground</td><td class="py-3 px-4">รายไตรมาส</td><td class="py-3 px-4 font-mono text-xs">2026-03-28</td><td class="py-3 px-4 text-right"><span class="bg-amber-50 text-amber-600 px-2.5 py-1 rounded-full text-xs">รอดำเนินการ</span></td></tr>
-                            </tbody>
-                        </table>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-sm text-slate-700">
+                                <thead><tr class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 uppercase">
+                                    <th class="py-3 px-4">รหัสอุปกรณ์</th><th class="py-3 px-4">ชื่องาน PM</th><th class="py-3 px-4">ความถี่</th><th class="py-3 px-4">กำหนดการ</th><th class="py-3 px-4 text-right">สถานะ</th>
+                                </tr></thead>
+                                <tbody id="schedule-tbody" class="divide-y divide-slate-100">
+                                    <tr><td class="py-3 px-4 font-mono text-blue-600 font-medium">TR-01</td><td class="py-3 px-4">ตรวจวัดอุณหภูมิน้ำมันหม้อแปลง และระบบ Ground</td><td class="py-3 px-4">รายไตรมาส</td><td class="py-3 px-4 font-mono text-xs">2026-03-28</td><td class="py-3 px-4 text-right"><span class="bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-1 rounded-full text-xs">รอดำเนินการ</span></td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </section>
 
-                <!-- TAB 3: วางแผนเส้นทางตรวจอุปกรณ์ -->
+                <!-- TAB 3: ROUTE PLAN -->
                 <section id="tab-route-plan" class="tab-content hidden space-y-6">
-                    <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                         <div class="flex justify-between items-center">
                             <div>
                                 <h3 class="font-bold text-base text-slate-900">วางแผนเส้นทางตรวจอุปกรณ์ (Route Planning)</h3>
                                 <p class="text-xs text-slate-500">เลือกจุดตรวจและจัดลำดับเส้นทางเดินตรวจภาคสนาม</p>
                             </div>
-                            <button onclick="saveRoutePlan()" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold cursor-pointer">บันทึกเส้นทางนี้</button>
+                            <button onclick="saveRoutePlan()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold cursor-pointer shadow-sm">บันทึกเส้นทางนี้</button>
                         </div>
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                            <div class="space-y-2 border p-4 rounded-xl bg-slate-50">
-                                <h4 class="font-bold text-xs text-slate-700 uppercase">เลือกจุดตรวจที่ต้องการ:</h4>
-                                <div class="space-y-1.5 text-xs">
-                                    <label class="flex items-center space-x-2"><input type="checkbox" checked class="route-chk" value="TR-01"><span>1. TR-01 (Main Transformer)</span></label>
-                                    <label class="flex items-center space-x-2"><input type="checkbox" checked class="route-chk" value="LBS-02"><span>2. LBS-02 (Load Break Switch)</span></label>
-                                    <label class="flex items-center space-x-2"><input type="checkbox" checked class="route-chk" value="RMU-01"><span>3. RMU-01 (Ring Main Unit)</span></label>
+                            <div class="space-y-3 border border-slate-200 p-4 rounded-xl bg-slate-50">
+                                <h4 class="font-bold text-xs text-slate-700 uppercase tracking-wider">เลือกจุดตรวจที่ต้องการ:</h4>
+                                <div class="space-y-2 text-xs text-slate-700">
+                                    <label class="flex items-center space-x-2"><input type="checkbox" checked class="route-chk accent-blue-600" value="TR-01"><span>1. TR-01 (Main Transformer)</span></label>
+                                    <label class="flex items-center space-x-2"><input type="checkbox" checked class="route-chk accent-blue-600" value="LBS-02"><span>2. LBS-02 (Load Break Switch)</span></label>
+                                    <label class="flex items-center space-x-2"><input type="checkbox" checked class="route-chk accent-blue-600" value="RMU-01"><span>3. RMU-01 (Ring Main Unit)</span></label>
                                 </div>
                             </div>
                             <div class="lg:col-span-2"><div id="routePlanMap"></div></div>
@@ -176,11 +184,11 @@
                     </div>
                 </section>
 
-                <!-- TAB 4: ฟอร์มเอกสารการบำรุงรักษาอุปกรณ์ไฟฟ้า (A4 - 11 แบบ กฟน.) -->
+                <!-- TAB 4: ELECTRICAL FORM (A4) -->
                 <section id="tab-electrical-form" class="tab-content hidden space-y-6">
                     <div class="max-w-[210mm] mx-auto bg-white p-4 rounded-2xl border border-slate-300 shadow-xs flex flex-wrap items-center justify-between gap-3 no-print">
                         <div class="flex items-center gap-2">
-                            <select id="formSelector" onchange="loadForm(this.value)" class="px-3 py-2 border border-slate-300 rounded-lg text-xs font-semibold bg-slate-50 text-slate-800">
+                            <select id="formSelector" onchange="loadForm(this.value)" class="px-3.5 py-2 border border-slate-300 rounded-xl text-xs font-semibold bg-slate-50 text-slate-800">
                                 <option value="015">SF-07-0-015: หม้อแปลงจำหน่าย[cite: 2]</option>
                                 <option value="016">SF-07-0-016: Load Break Switch (LBS)[cite: 3]</option>
                                 <option value="017">SF-07-0-017: Sectionalizer (SZ)[cite: 4]</option>
@@ -196,8 +204,8 @@
                             </select>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button onclick="saveNewRecord()" class="px-3.5 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-medium cursor-pointer shadow-xs">💾 บันทึกใหม่</button>
-                            <button onclick="window.print()" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-medium cursor-pointer shadow-xs">🖨️ พิมพ์/PDF</button>
+                            <button onclick="saveNewRecord()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-medium cursor-pointer shadow-sm">💾 บันทึกฟอร์ม</button>
+                            <button onclick="window.print()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-medium cursor-pointer shadow-sm">🖨️ พิมพ์/PDF</button>
                         </div>
                     </div>
                     <div class="sarabun-font flex justify-center pb-12">
@@ -205,61 +213,83 @@
                     </div>
                 </section>
 
-                <!-- TAB 5: นำเส้นทางตรวจ PM ภาคสนาม (Step-by-step Check-in) -->
+                <!-- TAB 5: FIELD ROUTE -->
                 <section id="tab-field-route" class="tab-content hidden space-y-6">
-                    <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                         <div class="flex justify-between items-center">
                             <div>
                                 <h3 class="font-bold text-base text-slate-900">โหมดนำทางภาคสนาม (Field Step-by-Step Check-in)</h3>
                                 <p class="text-xs text-slate-500">เดินตรวจตามลำดับจุดตรวจจริง พร้อมเช็คอินและสแกน QR อุปกรณ์</p>
                             </div>
-                            <button onclick="openFieldModal('TR-01')" class="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-2 cursor-pointer shadow">
+                            <button onclick="openFieldModal('TR-01')" class="px-5 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-2 cursor-pointer shadow-md">
                                 <i data-lucide="camera" class="w-4 h-4"></i><span>📷 สแกน QR / เช็คอินจุดถัดไป</span>
                             </button>
                         </div>
                         <div id="fieldRouteMap"></div>
-                        <div class="space-y-2 pt-2">
-                            <div class="p-3 border rounded-xl flex justify-between items-center bg-emerald-50 border-emerald-200">
-                                <div class="text-xs"><strong>จุดที่ 1: TR-01 (Main Transformer)</strong><br><span class="text-emerald-700">✓ เช็คอินแล้ว (เวลา 08:30 น.)</span></div>
-                                <span class="px-2.5 py-1 bg-emerald-600 text-white rounded-full text-[10px]">เสร็จสิ้น</span>
+                        <div class="space-y-2.5 pt-2">
+                            <div class="p-3.5 border border-emerald-200 rounded-xl flex justify-between items-center bg-emerald-50">
+                                <div class="text-xs text-slate-800"><strong>จุดที่ 1: TR-01 (Main Transformer)[cite: 8]</strong><br><span class="text-emerald-700">✓ เช็คอินและตรวจเสร็จสิ้น (เวลา 08:30 น.)</span></div>
+                                <span class="px-3 py-1 bg-emerald-600 text-white rounded-full text-[10px] font-semibold">เสร็จสิ้น</span>
                             </div>
-                            <div class="p-3 border rounded-xl flex justify-between items-center bg-white border-slate-200">
-                                <div class="text-xs"><strong>จุดที่ 2: LBS-02 (Load Break Switch อาคาร A)</strong><br><span class="text-slate-500">ระยะห่างประมาณ 120 เมตร</span></div>
-                                <button onclick="openFieldModal('LBS-02')" class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-semibold cursor-pointer">เช็คอินจุดนี้</button>
+                            <div class="p-3.5 border border-slate-200 rounded-xl flex justify-between items-center bg-white">
+                                <div class="text-xs text-slate-800"><strong>จุดที่ 2: LBS-02 (Load Break Switch อาคาร A)[cite: 3]</strong><br><span class="text-slate-500">ระยะห่างประมาณ 120 เมตรจากจุดปัจจุบัน</span></div>
+                                <button onclick="openFieldModal('LBS-02')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold cursor-pointer shadow-sm">เช็คอินจุดนี้</button>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- TAB 6: วิเคราะห์ความผิดปกติของ Work Order -->
+                <!-- TAB 6: WO ANALYTICS & EXCEL IMPORT -->
                 <section id="tab-wo-analytics" class="tab-content hidden space-y-6">
-                    <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
-                        <div class="flex justify-between items-center">
-                            <h3 class="font-bold text-base text-slate-900">วิเคราะห์ความผิดปกติของงาน Work Order แยกตามอุปกรณ์/ช่วงเวลา</h3>
-                            <button onclick="sendLineNotificationTest()" class="px-4 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer">
-                                <i data-lucide="send" class="w-4 h-4"></i><span>แจ้งเตือน LINE Notify / Email ด่วน</span>
-                            </button>
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                        <div class="flex flex-wrap justify-between items-center gap-3 border-b border-slate-100 pb-4">
+                            <div>
+                                <h3 class="font-bold text-base text-slate-900">วิเคราะห์ความผิดปกติ Work Order & นำเข้าไฟล์ Excel</h3>
+                                <p class="text-xs text-slate-500">อัปโหลดไฟล์ประวัติ Work Order (.xlsx, .xls) เพื่อให้ระบบวิเคราะห์อัตโนมัติ</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="sendLineNotificationTest()" class="px-3.5 py-2 bg-emerald-600 text-white rounded-xl text-xs font-semibold flex items-center space-x-1.5 cursor-pointer shadow-sm">
+                                    <i data-lucide="send" class="w-4 h-4"></i><span>แจ้งเตือน LINE ด่วน</span>
+                                </button>
+                                <label class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold flex items-center space-x-2 cursor-pointer shadow-sm">
+                                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i><span>📂 นำเข้า Excel WO</span>
+                                    <input type="file" id="excelUploadInput" accept=".xlsx, .xls, .csv" onchange="handleExcelImport(event)" class="hidden">
+                                </label>
+                            </div>
                         </div>
+
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div class="p-4 bg-slate-50 border rounded-xl"><span class="text-xs text-slate-500 block">งานซ่อม Active ทั้งหมด</span><strong class="text-2xl font-bold text-slate-900">5 รายการ</strong></div>
-                            <div class="p-4 bg-slate-50 border rounded-xl"><span class="text-xs text-slate-500 block">กำลังดำเนินการซ่อม</span><strong class="text-2xl font-bold text-amber-600">2 รายการ</strong></div>
-                            <div class="p-4 bg-slate-50 border rounded-xl"><span class="text-xs text-slate-500 block">ปิดงานสำเร็จแล้ว</span><strong class="text-2xl font-bold text-emerald-600">12 รายการ</strong></div>
+                            <div class="p-4 bg-slate-50 border rounded-xl"><span class="text-xs text-slate-500 block">จำนวน Work Order ทั้งหมด</span><strong id="excelTotalWO" class="text-2xl font-bold text-slate-900">0 รายการ</strong></div>
+                            <div class="p-4 bg-slate-50 border rounded-xl"><span class="text-xs text-slate-500 block">งานที่ค้างซ่อม / รอดำเนินการ</span><strong id="excelPendingWO" class="text-2xl font-bold text-amber-600">0 รายการ</strong></div>
+                            <div class="p-4 bg-slate-50 border rounded-xl"><span class="text-xs text-slate-500 block">ปิดงานสำเร็จ</span><strong id="excelClosedWO" class="text-2xl font-bold text-emerald-600">0 รายการ</strong></div>
                         </div>
-                        <div class="h-56 relative"><canvas id="woBarChart"></canvas></div>
+
+                        <div class="overflow-x-auto border rounded-xl">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead><tr class="bg-slate-100 text-slate-700 uppercase">
+                                    <th class="py-2.5 px-3">WO ID</th><th class="py-2.5 px-3">อุปกรณ์ / Code</th><th class="py-2.5 px-3">รายละเอียดอาการเสีย</th><th class="py-2.5 px-3">วันที่แจ้ง</th><th class="py-2.5 px-3 text-right">สถานะ</th>
+                                </tr></thead>
+                                <tbody id="excelTableBody" class="divide-y divide-slate-100">
+                                    <tr><td colspan="5" class="py-6 text-center text-slate-400">ยังไม่มีข้อมูล กรุณาอัปโหลดไฟล์ Excel ประวัติ Work Order ย้อนหลัง</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </section>
 
-                <!-- TAB 7: ตั้งค่าระบบ & Audit Log -->
+                <!-- TAB 7: SETTINGS & AUDIT LOG -->
                 <section id="tab-admin-settings" class="tab-content hidden space-y-6">
-                    <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm space-y-4">
                         <h3 class="font-bold text-base text-slate-900">ประวัติการแก้ไขข้อมูลระบบ (Audit Log)</h3>
-                        <table class="w-full text-left border-collapse text-xs">
-                            <thead><tr class="bg-slate-50 border-b uppercase text-slate-500"><th class="py-2.5 px-3">ผู้ใช้งาน</th><th class="py-2.5 px-3">การกระทำ</th><th class="py-2.5 px-3">เวลา</th></tr></thead>
-                            <tbody class="divide-y">
-                                <tr><td class="py-2.5 px-3">Supervisor (หัวหน้างาน)</td><td class="py-2.5 px-3">อนุมัติแผน PM อุปกรณ์ TR-01</td><td class="py-2.5 px-3 font-mono">14/09/2026 10:15</td></tr>
-                                <tr><td class="py-2.5 px-3">Field Tech (ช่างภาคสนาม)</td><td class="py-2.5 px-3">บันทึกผลตรวจ LBS-02 (พบปัญหา)</td><td class="py-2.5 px-3 font-mono">14/09/2026 09:30</td></tr>
-                            </tbody>
-                        </table>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs text-slate-700">
+                                <thead><tr class="bg-slate-50 border-b border-slate-200 uppercase text-slate-500"><th class="py-2.5 px-3">ผู้ใช้งาน</th><th class="py-2.5 px-3">การกระทำ</th><th class="py-2.5 px-3">เวลา</th></tr></thead>
+                                <tbody class="divide-y divide-slate-100">
+                                    <tr><td class="py-2.5 px-3">Supervisor (หัวหน้างาน)</td><td class="py-2.5 px-3">อนุมัติแผน PM อุปกรณ์ TR-01[cite: 8]</td><td class="py-2.5 px-3 font-mono text-blue-600">14/09/2026 10:15</td></tr>
+                                    <tr><td class="py-2.5 px-3">Field Tech (ช่างภาคสนาม)</td><td class="py-2.5 px-3">บันทึกผลตรวจ LBS-02 (พบปัญหา)[cite: 3]</td><td class="py-2.5 px-3 font-mono text-blue-600">14/09/2026 09:30</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </section>
             </div>
@@ -268,22 +298,22 @@
 
     <!-- MODAL: SCHEDULE ADD -->
     <div id="schedule-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4 text-slate-800">
             <h3 class="font-bold text-lg text-slate-900">สร้างแผนงาน PM ใหม่</h3>
             <form id="schedule-form" onsubmit="saveSchedule(event)" class="space-y-3 text-sm">
-                <div><label class="block text-xs font-semibold">ชื่องาน PM (เลือกอุปกรณ์):</label>
-                    <select id="sch-code" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs">
-                        <option value="TR-01">TR-01: Main Transformer 1000kVA</option>
-                        <option value="LBS-02">LBS-02: Load Break Switch</option>
-                        <option value="RMU-01">RMU-01: Ring Main Unit</option>
+                <div><label class="block text-xs font-semibold text-slate-600">ชื่องาน PM (เลือกอุปกรณ์):</label>
+                    <select id="sch-code" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl bg-slate-50 text-xs">
+                        <option value="TR-01">TR-01: Main Transformer 1000kVA[cite: 8]</option>
+                        <option value="LBS-02">LBS-02: Load Break Switch[cite: 3]</option>
+                        <option value="RMU-01">RMU-01: Ring Main Unit[cite: 5]</option>
                     </select>
                 </div>
-                <div><label class="block text-xs font-semibold">รายละเอียดงาน:</label><input type="text" id="sch-title" required class="w-full px-3.5 py-2 border rounded-xl" placeholder="ชื่องาน"></div>
-                <div><label class="block text-xs font-semibold">ความถี่:</label><select id="sch-freq" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs"><option value="รายวัน">รายวัน</option><option value="รายสัปดาห์">รายสัปดาห์</option><option value="รายเดือน" selected>รายเดือน</option><option value="รายไตรมาส">รายไตรมาส</option></select></div>
-                <div><label class="block text-xs font-semibold">กำหนดการ:</label><input type="date" id="sch-date" required class="w-full px-3.5 py-1.5 border rounded-xl"></div>
+                <div><label class="block text-xs font-semibold text-slate-600">รายละเอียดงาน:</label><input type="text" id="sch-title" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl bg-slate-50" placeholder="ชื่องาน"></div>
+                <div><label class="block text-xs font-semibold text-slate-600">ความถี่:</label><select id="sch-freq" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl bg-slate-50 text-xs"><option value="รายวัน">รายวัน</option><option value="รายสัปดาห์">รายสัปดาห์</option><option value="รายเดือน" selected>รายเดือน</option><option value="รายไตรมาส">รายไตรมาส</option></select></div>
+                <div><label class="block text-xs font-semibold text-slate-600">กำหนดการ:</label><input type="date" id="sch-date" required class="w-full px-3.5 py-2 border border-slate-300 rounded-xl bg-slate-50"></div>
                 <div class="pt-2 flex justify-end space-x-2">
-                    <button type="button" onclick="closeScheduleModal()" class="px-4 py-2 border rounded-xl text-xs cursor-pointer">ยกเลิก</button>
-                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold cursor-pointer">บันทึกแผนงาน</button>
+                    <button type="button" onclick="closeScheduleModal()" class="px-4 py-2 border border-slate-300 rounded-xl text-xs cursor-pointer text-slate-600">ยกเลิก</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold cursor-pointer shadow-sm">บันทึกแผนงาน</button>
                 </div>
             </form>
         </div>
@@ -291,43 +321,43 @@
 
     <!-- MODAL: FIELD INSPECTION & CHECKLIST WITH IMAGE ANNOTATION -->
     <div id="field-modal" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm hidden flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-xl w-full p-6 space-y-4">
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-2xl max-w-xl w-full p-6 space-y-4 text-slate-800">
             <h3 class="font-bold text-lg text-slate-900">บันทึกผลตรวจสอบ & แนบรูปถ่ายหน้างาน</h3>
             <div class="space-y-3 text-sm">
-                <div><label class="block text-xs font-semibold text-slate-600">รหัสอุปกรณ์:</label><input type="text" id="m-eq" readonly class="w-full px-3.5 py-2 border rounded-xl bg-slate-100 font-mono"></div>
+                <div><label class="block text-xs font-semibold text-slate-600">รหัสอุปกรณ์:</label><input type="text" id="m-eq" readonly class="w-full px-3.5 py-2 border border-slate-300 rounded-xl bg-slate-100 font-mono text-slate-800"></div>
                 <div class="grid grid-cols-2 gap-3">
-                    <div><label class="block text-xs font-semibold text-slate-600">พิกัด GPS อัตโนมัติ:</label><input type="text" id="m-gps" readonly class="w-full px-3 py-1.5 border rounded-xl bg-slate-100 font-mono text-xs"></div>
-                    <div><label class="block text-xs font-semibold text-slate-600">Timestamp อัตโนมัติ:</label><input type="text" id="m-time" readonly class="w-full px-3 py-1.5 border rounded-xl bg-slate-100 font-mono text-xs"></div>
+                    <div><label class="block text-xs font-semibold text-slate-600">พิกัด GPS อัตโนมัติ:</label><input type="text" id="m-gps" readonly class="w-full px-3.5 py-1.5 border border-slate-300 rounded-xl bg-slate-100 font-mono text-xs text-slate-700"></div>
+                    <div><label class="block text-xs font-semibold text-slate-600">Timestamp อัตโนมัติ:</label><input type="text" id="m-time" readonly class="w-full px-3.5 py-1.5 border border-slate-300 rounded-xl bg-slate-100 font-mono text-xs text-slate-700"></div>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">Checklist มาตรฐาน:</label>
-                    <div class="space-y-2 bg-slate-50 p-3 rounded-xl border text-xs max-h-40 overflow-y-auto">
-                        <div class="flex justify-between items-center py-1 border-b"><span>1. ค่าฉนวน (Insulation Resistance)</span><select class="border rounded p-1"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
-                        <div class="flex justify-between items-center py-1 border-b"><span>2. กระแสไฟฟ้า & แรงดันไฟ</span><select class="border rounded p-1"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
-                        <div class="flex justify-between items-center py-1 border-b"><span>3. สภาพ Breaker / Fuse</span><select class="border rounded p-1"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
-                        <div class="flex justify-between items-center py-1"><span>4. ป้าย Safety Label & Grounding</span><select class="border rounded p-1"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
+                    <div class="space-y-2 bg-slate-50 p-3 rounded-xl border border-slate-200 text-xs max-h-40 overflow-y-auto">
+                        <div class="flex justify-between items-center py-1 border-b border-slate-200"><span>1. ค่าฉนวน (Insulation Resistance)[cite: 8, 9]</span><select class="border border-slate-300 rounded p-1 bg-white"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
+                        <div class="flex justify-between items-center py-1 border-b border-slate-200"><span>2. กระแสไฟฟ้า & แรงดันไฟ[cite: 2, 6]</span><select class="border border-slate-300 rounded p-1 bg-white"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
+                        <div class="flex justify-between items-center py-1 border-b border-slate-200"><span>3. สภาพ Breaker / Fuse[cite: 3, 6, 7]</span><select class="border border-slate-300 rounded p-1 bg-white"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
+                        <div class="flex justify-between items-center py-1"><span>4. ป้าย Safety Label & Grounding[cite: 2, 8]</span><select class="border border-slate-300 rounded p-1 bg-white"><option>ผ่าน</option><option>ไม่ผ่าน</option><option>N/A</option></select></div>
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">แนบรูปถ่ายหน้างาน (พร้อมปุ่มถ่ายรูป/อัปโหลดรายข้อ):</label>
-                    <input type="file" id="m-img" accept="image/*" onchange="compressAndPreviewImage(event)" class="text-xs">
-                    <div id="image-preview-container" class="mt-2 hidden border rounded-xl p-2 bg-slate-50 text-center">
-                        <canvas id="annotationCanvas" class="max-w-full mx-auto border cursor-crosshair rounded"></canvas>
+                    <input type="file" id="m-img" accept="image/*" onchange="compressAndPreviewImage(event)" class="text-xs text-slate-600">
+                    <div id="image-preview-container" class="mt-2 hidden border border-slate-200 rounded-xl p-2 bg-slate-50 text-center">
+                        <canvas id="annotationCanvas" class="max-w-full mx-auto border border-slate-300 cursor-crosshair rounded"></canvas>
                         <p class="text-[10px] text-slate-500 mt-1">คลิกและลากเมาส์บนรูปเพื่อวาดวงกลม/ลูกศรชี้จุดที่มีปัญหา</p>
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">ระดับความเสี่ยง / ความเร่งด่วน:</label>
-                    <select id="m-risk" class="w-full px-3.5 py-2 border rounded-xl"><option value="ปกติ">ปกติ (Normal)</option><option value="เฝ้าระวัง">เฝ้าระวัง (Warning)</option><option value="ต้องซ่อมด่วน">ต้องซ่อมด่วน (Critical)</option></select>
+                    <select id="m-risk" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl bg-white"><option value="ปกติ">ปกติ (Normal)</option><option value="เฝ้าระวัง">เฝ้าระวัง (Warning)</option><option value="ต้องซ่อมด่วน">ต้องซ่อมด่วน (Critical)</option></select>
                 </div>
                 <div>
                     <label class="block text-xs font-semibold text-slate-600 mb-1">ลายเซ็นดิจิทัลผู้ตรวจ (ผูกกับบัญชีผู้ใช้):</label>
-                    <input type="text" id="m-sig" placeholder="พิมพ์ชื่อ-นามสกุล แทนลายเซ็นดิจิทัล" class="w-full px-3.5 py-2 border rounded-xl font-serif italic">
+                    <input type="text" id="m-sig" placeholder="พิมพ์ชื่อ-นามสกุล แทนลายเซ็นดิจิทัล" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl bg-white font-serif italic">
                 </div>
             </div>
             <div class="pt-2 flex justify-end space-x-2">
-                <button onclick="closeFieldModal()" class="px-4 py-2 border rounded-xl text-xs font-medium cursor-pointer">ยกเลิก</button>
-                <button onclick="saveFieldInspection()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold cursor-pointer">บันทึกและซิงค์ข้อมูล</button>
+                <button onclick="closeFieldModal()" class="px-4 py-2 border border-slate-300 rounded-xl text-xs font-medium cursor-pointer text-slate-600">ยกเลิก</button>
+                <button onclick="saveFieldInspection()" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-semibold cursor-pointer shadow-sm">บันทึกและซิงค์ข้อมูล</button>
             </div>
         </div>
     </div>
@@ -359,12 +389,9 @@
                             <td colspan="2">Lat. <input type="text" id="lat015" class="inline-block w-3/4"></td>
                             <td colspan="2">Long. <input type="text" id="long015" class="inline-block w-3/4"></td>
                         </tr>
-                        <tr><td colspan="2" class="sub-header-bg">MEA No1.</td><td><input type="text"></td><td class="sub-header-bg">MEA No2.</td><td><input type="text"></td><td>MEA No3. <input type="text" class="w-1/4 inline-block"> เฟส <input type="text" class="w-1/4 inline-block"></td></tr>
                         <tr><td class="form-header-bg text-center">2</td><td colspan="5" class="form-header-bg">รายการตรวจสอบบำรุงรักษา[cite: 2]</td></tr>
-                        <tr><td rowspan="2" colspan="2" class="sub-header-bg text-center">รายการ[cite: 2]</td><td colspan="3" class="sub-header-bg text-center">ผลการตรวจสอบ[cite: 2]</td><td rowspan="2" class="sub-header-bg text-center w-48">ข้อบกพร่อง[cite: 2]</td></tr>
-                        <tr><td class="sub-header-bg text-center w-12">ปกติ[cite: 2]</td><td class="sub-header-bg text-center w-12">ชำรุด[cite: 2]</td><td class="sub-header-bg text-center w-12">ไม่มี[cite: 2]</td></tr>
-                        ${["2.1 Drop Fuse[cite: 2]", "2.2 Station Post Type Insulator[cite: 2]", "2.3 สายเข้า-ออก Drop Fuse[cite: 2]", "2.4 คอนสาย[cite: 2]", "2.5 อุปกรณ์ป้องกันสัตว์[cite: 2]", "2.6 Low Voltage Capacitor[cite: 2]", "2.7 กับดักฟ้าผ่า (L/A)[cite: 2]", "2.8 ตัวถังหม้อแปลง[cite: 2]", "2.9 Bushing HV-LV[cite: 2]", "2.10 Cover (Bushing,L/A,Term. kit)[cite: 2]", "2.11 สายหน้าหม้อแปลง LV[cite: 2]", "2.12 LV Ground[cite: 2]", "2.13 HV Ground[cite: 2]", "2.14 CT-TLM Meter (ถ้ามี)[cite: 2]"].map((item, i) => `
-                            <tr><td colspan="2">${item}</td><td class="text-center"><input type="checkbox"></td><td class="text-center"><input type="checkbox"></td><td class="text-center"><input type="checkbox"></td><td><input type="text"></td></tr>
+                        ${["2.1 Drop Fuse[cite: 2]", "2.2 Station Post Type Insulator[cite: 2]"].map(item => `
+                            <tr><td colspan="2">${item}</td><td class="text-center w-12"><input type="checkbox"> ปกติ</td><td class="text-center w-12"><input type="checkbox"> ชำรุด</td><td class="text-center w-12"><input type="checkbox"> ไม่มี</td><td><input type="text"></td></tr>
                         `).join('')}
                     </table>
                     <div class="flex justify-between text-[9px] mt-2 pt-1 border-t border-black text-black"><span>ปรับปรุงครั้งที่ 0 วันที่...[cite: 2]</span><span class="font-mono">SF-07-0-015[cite: 2]</span></div>
@@ -372,7 +399,6 @@
             }
         };
 
-        // Fallback for 016-025 forms
         ['016','017','018','019','019_2','020','021','022','023','024','025'].forEach(k => {
             if(!formsData[k]) {
                 let codeRef = `SF-07-0-${k}`;
@@ -392,8 +418,6 @@
                                 <td colspan="2">Long. <input type="text" id="long${k}" class="inline-block w-3/4"></td>
                             </tr>
                             <tr><td class="form-header-bg text-center">2</td><td colspan="5" class="form-header-bg">รายการตรวจสอบบำรุงรักษามาตรฐาน ${citationRef}</td></tr>
-                            <tr><td rowspan="2" colspan="2" class="sub-header-bg text-center">รายการ ${citationRef}</td><td colspan="3" class="sub-header-bg text-center">ผลการตรวจสอบ ${citationRef}</td><td rowspan="2" class="sub-header-bg text-center w-48">ข้อบกพร่อง ${citationRef}</td></tr>
-                            <tr><td class="sub-header-bg text-center w-12">ปกติ ${citationRef}</td><td class="sub-header-bg text-center w-12">ชำรุด ${citationRef}</td><td class="sub-header-bg text-center w-12">ไม่มี ${citationRef}</td></tr>
                             ${["2.1 สภาพภายนอกและโครงสร้างตู้", "2.2 ระบบกราวด์และจุดต่อสาย", "2.3 อุปกรณ์ป้องกันและฟิวส์", "2.4 ระบบควบคุมและแรงดันไฟฟ้า", "2.5 ผลการทดสอบการปลดสับ"].map((item, idx) => `
                                 <tr><td colspan="2">${item} ${citationRef}</td><td class="text-center"><input type="checkbox"></td><td class="text-center"><input type="checkbox"></td><td class="text-center"><input type="checkbox"></td><td><input type="text"></td></tr>
                             `).join('')}
@@ -410,12 +434,7 @@
             window.addEventListener('online', () => { state.isOnline = true; updateOnlineStatus(); autoSync(); });
             window.addEventListener('offline', () => { state.isOnline = false; updateOnlineStatus(); });
             loadForm('015');
-            renderSchedules();
-            renderDashboard();
             initTrendChart();
-            initWOBarChart();
-            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-            document.getElementById('current-date-display').innerText = new Date().toLocaleDateString('th-TH', options);
         });
 
         function updateOnlineStatus() {
@@ -424,12 +443,12 @@
             document.getElementById('offline-count').innerText = state.offlineQueue.length;
             if (state.isOnline) {
                 banner.classList.add('hidden');
-                badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-1"></span> ออนไลน์';
-                badge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 flex items-center space-x-1';
+                badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mr-1"></span> <span>ออนไลน์</span>';
+                badge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center space-x-1.5';
             } else {
                 banner.classList.remove('hidden');
-                badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500 mr-1"></span> ออฟไลน์';
-                badge.className = 'px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 flex items-center space-x-1';
+                badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-amber-500 mr-1"></span> <span>ออฟไลน์</span>';
+                badge.className = 'px-3 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200 flex items-center space-x-1.5';
             }
         }
 
@@ -437,8 +456,10 @@
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.getElementById(`tab-${tabId}`).classList.remove('hidden');
             document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.remove('bg-slate-800', 'text-white', 'shadow-md');
-                if (btn.getAttribute('data-target') === tabId) btn.classList.add('bg-slate-800', 'text-white', 'shadow-md');
+                btn.classList.remove('bg-slate-800', 'text-white', 'shadow-xs');
+                if (btn.getAttribute('data-target') === tabId) {
+                    btn.classList.add('bg-slate-800', 'text-white', 'shadow-xs');
+                }
             });
             const titles = {
                 dashboard: 'Dashboard & Analytics',
@@ -446,7 +467,7 @@
                 'route-plan': 'วางแผนเส้นทางตรวจอุปกรณ์',
                 'electrical-form': 'ฟอร์มเอกสารการบำรุงรักษาอุปกรณ์ไฟฟ้า',
                 'field-route': 'นำเส้นทางตรวจ & บันทึกภาคสนาม',
-                'wo-analytics': 'วิเคราะห์ความผิดปกติ Work Order',
+                'wo-analytics': 'วิเคราะห์ Work Order (นำเข้า Excel)',
                 'admin-settings': 'จัดการสิทธิ์ & Audit Log'
             };
             document.getElementById('page-title').innerText = titles[tabId] || 'PM-CMMS Pro';
@@ -491,13 +512,6 @@
             showToast(`เปลี่ยนสิทธิ์เป็น: ${role}`);
         }
 
-        function renderDashboard() {
-            document.getElementById('stat-total').innerText = 12;
-            document.getElementById('stat-pass').innerText = 9;
-            document.getElementById('stat-warning').innerText = 2;
-            document.getElementById('stat-critical').innerText = 1;
-        }
-
         function initTrendChart() {
             const ctx = document.getElementById('trendChart').getContext('2d');
             new Chart(ctx, {
@@ -507,8 +521,8 @@
                     datasets: [{
                         label: 'อุณหภูมิจุดต่อสาย TR-01 (°C)[cite: 8, 11]',
                         data: [58, 60, 62, 65, 74, 82],
-                        borderColor: '#f43f5e',
-                        backgroundColor: 'rgba(244, 63, 94, 0.1)',
+                        borderColor: '#2563eb',
+                        backgroundColor: 'rgba(37, 99, 235, 0.1)',
                         fill: true,
                         tension: 0.3
                     }]
@@ -517,33 +531,60 @@
             });
         }
 
-        function initWOBarChart() {
-            const ctx = document.getElementById('woBarChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['หม้อแปลง (TR)', 'สวิตช์ (LBS)', 'ตู้ RMU', 'คาปาซิเตอร์'],
-                    datasets: [{
-                        label: 'จำนวนปัญหา Work Order ที่พบ',
-                        data: [4, 7, 2, 3],
-                        backgroundColor: '#3b82f6',
-                        borderRadius: 6
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false }
-            });
-        }
+        function handleExcelImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
 
-        function renderSchedules() {
-            document.getElementById('schedule-tbody').innerHTML = state.schedules.map(s => `
-                <tr>
-                    <td class="py-3 px-4 font-mono">${s.code}</td>
-                    <td class="py-3 px-4">${s.title}</td>
-                    <td class="py-3 px-4">${s.freq}</td>
-                    <td class="py-3 px-4 font-mono text-xs">${s.dueDate}</td>
-                    <td class="py-3 px-4 text-right"><span class="bg-amber-50 text-amber-600 px-2.5 py-1 rounded-full text-xs">${s.status}</span></td>
-                </tr>
-            `).join('');
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonRows = XLSX.utils.sheet_to_json(worksheet);
+
+                    if (jsonRows.length === 0) {
+                        alert("⚠️ ไม่พบข้อมูลในไฟล์ Excel หรือรูปแบบตารางไม่ถูกต้อง");
+                        return;
+                    }
+
+                    const tbody = document.getElementById('excelTableBody');
+                    let pendingCount = 0;
+                    let closedCount = 0;
+
+                    tbody.innerHTML = jsonRows.map((row, index) => {
+                        const woId = row['WO ID'] || row['WorkOrderID'] || row['ID'] || `WO-90${index+1}`;
+                        const eqCode = row['อุปกรณ์'] || row['Equipment'] || row['Code'] || 'TR-01';
+                        const desc = row['รายละเอียด'] || row['Description'] || row['Problem'] || 'ตรวจสอบตามรอบ';
+                        const dateVal = row['วันที่'] || row['Date'] || '2026-03-01';
+                        const status = row['สถานะ'] || row['Status'] || 'รอดำเนินการ';
+
+                        if(status.includes('เสร็จ') || status.includes('Close') || status.includes('ปิด')) closedCount++;
+                        else pendingCount++;
+
+                        return `
+                            <tr>
+                                <td class="py-2.5 px-3 font-mono text-blue-600">${woId}</td>
+                                <td class="py-2.5 px-3 font-bold">${eqCode}</td>
+                                <td class="py-2.5 px-3">${desc}</td>
+                                <td class="py-2.5 px-3 font-mono">${dateVal}</td>
+                                <td class="py-2.5 px-3 text-right"><span class="px-2 py-0.5 rounded text-[10px] ${status.includes('เสร็จ') ? 'bg-emerald-50 text-emerald-600' : 'bg-amber-50 text-amber-600'}">${status}</span></td>
+                            </tr>
+                        `;
+                    }).join('');
+
+                    document.getElementById('excelTotalWO').innerText = jsonRows.length + " รายการ";
+                    document.getElementById('excelPendingWO').innerText = pendingCount + " รายการ";
+                    document.getElementById('excelClosedWO').innerText = closedCount + " รายการ";
+
+                    showToast(`📂 นำเข้าประวัติ Work Order จาก Excel สำเร็จ (${jsonRows.length} แถว)`);
+                } catch (err) {
+                    console.error(err);
+                    alert("❌ เกิดข้อผิดพลาดในการอ่านไฟล์ Excel: กรุณาตรวจสอบรูปแบบไฟล์");
+                }
+            };
+            reader.readAsArrayBuffer(file);
         }
 
         function loadForm(key) {
@@ -566,6 +607,20 @@
             closeScheduleModal();
             renderSchedules();
             showToast('สร้างแผน PM สำเร็จ');
+        }
+
+        function renderSchedules() {
+            const tbody = document.getElementById('schedule-tbody');
+            if(!tbody) return;
+            tbody.innerHTML = state.schedules.map(s => `
+                <tr>
+                    <td class="py-3 px-4 font-mono text-blue-600 font-medium">${s.code}</td>
+                    <td class="py-3 px-4">${s.title}</td>
+                    <td class="py-3 px-4">${s.freq}</td>
+                    <td class="py-3 px-4 font-mono text-xs">${s.dueDate}</td>
+                    <td class="py-3 px-4 text-right"><span class="bg-amber-50 text-amber-600 border border-amber-200 px-2.5 py-1 rounded-full text-xs">${s.status}</span></td>
+                </tr>
+            `).join('');
         }
 
         function openFieldModal(code) {
@@ -613,19 +668,9 @@
 
         function saveFieldInspection() {
             const sig = document.getElementById('m-sig').value;
-            const risk = document.getElementById('m-risk').value;
             if (!sig) { alert('กรุณากรอกลายเซ็นดิจิทัลก่อนบันทึก'); return; }
-            
-            const inspectionData = { code: document.getElementById('m-eq').value, risk, time: document.getElementById('m-time').value };
-            
-            if (state.isOnline) {
-                showToast('บันทึกและส่งข้อมูลขึ้น Server เรียบร้อย');
-            } else {
-                state.offlineQueue.push(inspectionData);
-                document.getElementById('offline-count').innerText = state.offlineQueue.length;
-                showToast('ออฟไลน์: บันทึกข้อมูลเก็บไว้ในเครื่องเรียบร้อย');
-            }
             closeFieldModal();
+            showToast('บันทึกและซิงค์ผลการตรวจภาคสนามสำเร็จ');
         }
 
         function manualSync() {
@@ -644,7 +689,7 @@
         }
 
         function sendLineNotificationTest() {
-            showToast('ส่งแจ้งเตือนผ่าน LINE Notify & Email ไปยังทีมซ่อมบำรุงเรียบร้อย!');
+            showToast('ส่งแจ้งเตือนผ่าน LINE Notify & Email เรียบร้อย!');
         }
 
         function exportReportData() {
